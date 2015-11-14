@@ -1,0 +1,19 @@
+﻿@{
+    ViewBag.Title = "页面滚动测试";
+}
+
+<script>
+    function test(message) {
+        $("#test").append("<p>" + message + "</p>");
+    }
+</script>
+
+<h2 class="page-header">页面滚动测试（未完成）</h2>
+
+<iframe style="margin-top: 20px;height:400px;width: 100%;border: none;" src="@Url.Action("Scroll_Frame")"></iframe>
+
+<h3>测试输出：</h3>
+
+<div id="test">
+
+</div>

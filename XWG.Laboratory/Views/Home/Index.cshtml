@@ -1,0 +1,78 @@
+﻿@{
+    ViewBag.Title = "小网格实验室";
+}
+@section Scripts{
+    <!-- 首先引用 jQuery 类库 -->
+    <!-- 再引用 SignalR 类库 -->
+    @Scripts.Render("~/signalr/js")
+    <!-- 引用自动生成的 SignalR hub 脚本 -->
+    @Scripts.Render("~/signalr/hubs")
+
+    <script>
+        $(function () {
+            try {
+                // 自动生成的hub代理
+                var chat = $.connection.messageHub;
+
+                // hub的回调方法，用于显示消息到页面
+                chat.client.addNewMessageToPage = function (name, message) {
+                    // 将消息添加到页面
+                    $('#discussion').append('<li><strong>' + htmlEncode(name)
+                        + '</strong>: ' + htmlEncode(message) + '</li>');
+                };
+
+                // hub的回调方法，用于刷新页面
+                chat.client.refresh = function () {
+                    window.location.href = window.location.href;
+                };
+
+                // 为输入框设置焦点
+                $('#displayname').focus();
+
+                // 开始与hub连接
+                $.connection.hub.start().done(function () {
+                    $('#sendmessage').click(function () {
+                        // 调用hub的send方法
+                        chat.server.sendToAll($('#displayname').val(), $('#message').val());
+                        // 发送完毕后清空输入框
+                        $('#message').val('');
+                    });
+                });
+            } catch (e) {
+                alert("hehe5");
+                $('#message').val(e);
+                alert("hehe6");
+            }
+        });
+        // 为消息加一个div，为了好看
+        function htmlEncode(value) {
+            var encodedValue = $('<div />').text(value).html();
+            return encodedValue;
+        }
+    </script>
+}
+<div class="row">
+    <div class="col-xs-1"></div>
+    <div class="col-xs-10">
+        <h2 class="row">消息测试（有记录）</h2>
+        <div class="row form-inline">
+            <div class="form-group">
+                <label for="displayname">昵称：</label>
+                <input id="displayname" class="form-control" type="text" value="网友" />
+            </div>
+            <div class="form-group">
+                <label for="displayname">消息：</label>
+                <input id="message" class="form-control" type="text" />
+            </div>
+            <input id="sendmessage" class="btn btn-primary" type="button" value="发送" />
+        </div>
+        <div class="row" style="height: 10px;">
+        </div>
+        <div class="row">
+            <div class="well">
+                <ul id="discussion" style="padding-left: 10px;list-style: none;"></ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-xs-1"></div>
+</div>

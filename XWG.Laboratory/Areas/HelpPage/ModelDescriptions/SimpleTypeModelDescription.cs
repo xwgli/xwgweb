@@ -1,0 +1,6 @@
+namespace XWG.Laboratory.Areas.HelpPage.ModelDescriptions
+{
+    public class SimpleTypeModelDescription : ModelDescription
+    {
+    }
+}

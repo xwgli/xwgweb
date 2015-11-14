@@ -1,0 +1,283 @@
+﻿@{
+    ViewBag.Title = "HTML5音频库 - Buzz 测试";
+}
+
+@Scripts.Render("~/buzz/js")
+
+<script>
+    //testSound.load();//加载
+    //testSound.play();//播放
+    //testSound.pause();//暂停
+    //testSound.togglePlay();//切换播放暂停
+    //testSound.stop();//停止
+    //testSound.loop();//循环
+    //testSound.unloop();//取消循环
+
+    //testSound.isPaused();//是否暂停或结束
+    //testSound.isEnded();//是否结束
+
+    //testSound.mute();//静音
+    //testSound.unmute();//取消静音
+    //testSound.toggleMute();//切换静音
+
+    //testSound.isMuted()//是否静音
+
+    //testSound.setVolume(20);//设置音量（0-100）
+    //testSound.getVolume();//获取音量
+
+    //testSound.increaseVolume();//增加音量（默认为1，或按传入参数）
+    //testSound.decreaseVolume(10);//减小音量（默认为1，或按传入参数）
+
+    ////音频淡入效果（音量从0渐增至100），可传入参数，第一个为淡入效果时长（毫秒），第二个是效果结束后的回调方法
+    //testSound.fadeIn(5000, function () {
+    //    testMesssage("淡入效果结束！");
+    //});
+
+    ////音频淡出效果（音量从100渐减至0），参数同淡入效果
+    //testSound.fadeOut(5000, function () {
+    //    testMesssage("淡出效果结束！");
+    //});
+
+    ////音频音量渐变效果（从当前音量渐变至指定值），第一个参数是渐变到的音量值，后两个同淡入淡出效果
+    //testSound.fadeTo(50, 5000, function () {
+    //    testMesssage("渐变效果结束！");
+    //});
+
+    //淡出testSound1，淡入testSound2。第二个参数为效果时长。
+    //testSound1.fadeWith(testSound2, 2000);
+
+    ////遍历当前所有音频
+    //for (var i in buzz.sounds) {
+    //    var timer = buzz.toTimer(buzz.sounds[i].getDuration());
+    //    testMesssage("歌曲时长：" + timer);
+    //}
+</script>
+
+<script>
+
+    var soundPath = "@WebHelper.GetRelativeUrl("~/Sounds")";
+
+    var buffering = false, isMute = false;
+
+    var currentMusic;
+
+    $(function () {
+        musicSupportCheck();
+
+        initMusicPlayer();
+
+        buffering = true;
+
+        currentMusic = new buzz.sound(soundPath + "/test", {
+            //为了避免浏览器可能对某种音频格式不支持，可能会尝试加载多种格式的音频文件。
+            //加载音频时，使用此参数，以尝试加载所有可能的音频格式（即自动在音频路径后加扩展名）。
+            formats: ["ogg", "mp3", "aac", "wav"],
+            //预加载：metadata / true / false
+            preload: true,
+            //自动播放
+            autoplay: false,
+            //循环播放
+            loop: true,
+            //音量（0-100）
+            volume: 100,
+            //使用 Web Audio API 接口播放音频以提高性能（不一定支持？）
+            webAudioApi: false
+        });
+
+        //音频方法可以链式调用
+        currentMusic
+            .bind("error", musicOnError)
+            .bind("timeupdate", musicOnTimeUpdate)
+            .bind("loadedmetadata", musicOnLoadedMetaData)
+            .bind("abort", musicOnStop).bind("ended", musicOnStop).bind("pause", musicOnStop)
+            .bind("play", musicOnPlay)
+            .play().fadeIn();
+    });
+
+
+    //播放事件
+    function musicOnPlay(e) {
+        $("#btnMusicPlay").text("暂停");
+        testMesssage("开始播放[" + e.type + "]：" + decodeURIComponent(this.sound.currentSrc));
+    }
+
+    //停止事件
+    function musicOnStop(e) {
+        $("#btnMusicPlay").text("播放");
+        testMesssage("停止播放[" + e.type + "]：" + decodeURIComponent(this.sound.currentSrc));
+    }
+
+    //元数据已加载
+    function musicOnLoadedMetaData() {
+        var timer = buzz.toTimer(this.getDuration());
+        testMesssage("歌曲时长：" + timer);
+
+        $("#musicName").text(this.sound.currentSrc);
+    }
+
+    //错误处理
+    function musicOnError() {
+        testMesssage("音频出错（" + this.sound.currentSrc + "）：" + this.getErrorMessage());
+    }
+
+    //音乐播放进度更新
+    function musicOnTimeUpdate() {
+
+        var current = this.getTime();
+        var total = this.getDuration();
+
+        //显示播放进度
+        $("#musicTimer").text("[" + buzz.toTimer(current) + "/" + buzz.toTimer(total) + "]");
+        $("#musicVolume").text("[" + this.getVolume() + "%]");
+
+        //缓冲数据未完成之前显示缓冲百分比
+        if (buffering) {
+            //获取缓冲数据
+            var buffered = this.getBuffered();
+            if (buffered && (buffered.length > 0) && (!isNaN(buffered[0].end))) {
+                current = buffered[0].end;
+            }
+            //计算缓冲百分比
+            var percent = buzz.toPercent(current, total, 2);
+            if (isNaN(percent)) { percent = 0; }
+            buffering = (percent < 100);
+            testMesssage("已缓冲：" + percent + "%");
+            $("#musicBuffered").text("[" + percent + "%]");
+        }
+    }
+
+    //播放/暂停
+    function musicTogglePlay() {
+        if (currentMusic) {
+            currentMusic.togglePlay();
+        }
+    }
+
+    //增加音量
+    function musicIncreaseVolume() {
+        if (currentMusic) {
+            currentMusic.increaseVolume(10);
+        }
+    }
+
+    //静音
+    function musicMute() {
+        if (currentMusic) {
+            isMute = !isMute;
+
+            //静音
+            if (isMute) {
+                currentMusic.mute();
+                $("#btnMusicMute").text("取消静音");
+            }
+            else {
+                currentMusic.unmute();
+                $("#btnMusicMute").text("静音");
+            }
+        }
+    }
+
+    //减小音量
+    function musicDecreaseVolume() {
+        if (currentMusic) {
+            currentMusic.decreaseVolume(10);
+        }
+    }
+
+    //检查浏览器支持情况
+    function musicSupportCheck() {
+        var message;
+        var support = false;
+        if (buzz.isSupported()) {
+            message = "当前浏览器支持的音频格式：";
+
+            if (buzz.isOGGSupported()) {
+                message += " OGG ";
+                support = true;
+            }
+            if (buzz.isWAVSupported()) {
+                message += " WAV ";
+                support = true;
+            }
+            if (buzz.isMP3Supported()) {
+                message += " MP3 ";
+                support = true;
+            }
+            if (buzz.isAACSupported()) {
+                message += " AAC ";
+                support = true;
+            }
+        }
+        else {
+            message = "当前浏览器不支持 音频 播放";
+        }
+        testMesssage(message);
+        return support;
+    }
+
+    //初始化播放器的选项
+    function initMusicPlayer() {
+
+        // 是否预加载音频：auto, metadata, none
+        buzz.defaults.preload = 'auto';
+
+        // 音频加载完成后是否自动播放
+        buzz.defaults.autoplay = false;
+
+        // 是否循环播放
+        buzz.defaults.loop = true;
+
+        // 当时间转换出错时显示的占位符
+        buzz.defaults.placeholder = '--';
+
+        // 淡入淡出效果持续时长（毫秒）
+        buzz.defaults.duration = 2000;
+
+        // 默认音量
+        buzz.defaults.volume = 100;
+
+        // 自动检测文件的格式（设置此项后，请勿在音频文件路径最后加扩展名，否则会重复）
+        //buzz.defaults.formats = ['ogg', 'mp3', 'aac', 'wav'];
+    }
+
+    //测试输出方法
+    function testMesssage(message) {
+        $("#test").append(message + "\r\n");
+    }
+</script>
+
+<h2 class="page-header">HTML5音频库 - Buzz 测试</h2>
+
+<div class="well">
+    <div class="form-group">
+        <label for="test">当前音频：</label>
+        <div>
+            音频地址：
+            <span id="musicName"></span>
+            <br />
+            播放进度：
+            <span id="musicTimer"></span>
+            <br />
+            缓冲进度：
+            <span id="musicBuffered"></span>
+            <br />
+            当前音量：
+            <span id="musicVolume"></span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="">音频控制：</label>
+        <div class="form-group form-inline">
+            <button class="btn btn-default" onclick="musicTogglePlay()" id="btnMusicPlay">播放</button>
+            <button class="btn btn-default" onclick="musicMute()" id="btnMusicMute">静音</button>
+            <button class="btn btn-default" disabled="disabled">上一首</button>
+            <button class="btn btn-default" disabled="disabled">下一首</button>
+            <button class="btn btn-default" onclick="musicIncreaseVolume()">加大音量</button>
+            <button class="btn btn-default" onclick="musicDecreaseVolume()">减小音量</button>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="test">测试输出：</label>
+        <textarea id="test" class="form-control" rows="10"></textarea>
+    </div>
+</div>

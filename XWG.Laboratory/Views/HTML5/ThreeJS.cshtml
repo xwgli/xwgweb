@@ -1,0 +1,180 @@
+﻿@{
+    ViewBag.Title = "WebGL 类库 - Three.js 测试";
+}
+
+@Scripts.Render("~/three/js")
+
+<style>
+    #showarea {
+        width: 100%;
+        height: 300px;
+    }
+</style>
+
+<script>
+
+    //渲染器
+    var renderer;
+    function initRenderer() {
+        //显示容器
+        var container = $("#showarea").get(0);
+        //显示宽高
+        var width = $("#showarea").width();
+        var height = $("#showarea").height();
+        //初始化渲染器，判断浏览器是否支持WebGL？？？
+        //alert(window.Modernizr.webgl);
+        if (isUseCanvas) {
+            renderer = new THREE.CanvasRenderer();
+        }
+        else {
+            //antialias：抗锯齿效果
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+        }
+        renderer.setSize(width, height);
+        container.innerHTML = "";
+        container.appendChild(renderer.domElement);
+        //渲染区域的背景色
+        renderer.setClearColorHex(0xFFFFFF, 1.0);
+    }
+
+    //相机
+    var camera;
+    function initCamera() {
+        //计算显示比例
+        var width = $("#showarea").width();
+        var height = $("#showarea").height();
+        var ratio = width / height;
+
+        //初始化相机
+        //第一个参数是视野角（图示：i<|）
+        //第二个参数是显示比例（宽:高）
+        //第三个参数相机离视体积最近的距离
+        //第四个参数相机离视体积最远的距离
+        camera = new THREE.PerspectiveCamera(45, ratio, 1, 1000);
+
+        //相机的位置坐标，左右（x），上下（y），前后（z）
+        camera.position.x = 0;
+        camera.position.y = 0;
+        camera.position.z = 150;
+
+        //？？？
+        camera.up.x = 0;
+        camera.up.y = 0;
+        camera.up.z = 0;
+
+        //设置视野的中心坐标
+        camera.lookAt({ x: 0, y: 0, z: 0 });
+    }
+
+    //场景
+    var scene;
+    function initScene() {
+        scene = new THREE.Scene();
+    }
+
+    //灯光
+    var light;
+    function initLight() {
+        //第一个参数是光源的颜色
+        //第二个参数是光源的强度
+        //第三个参数是点光源的有效距离
+        light = new THREE.PointLight(0xFF0000, 1.2, 1000);
+        //光源方向向量是从position指定的 点(x, y, z) 开始到 点(0, 0, 0) 的方向
+        light.position.set(100, 100, 200);
+        //添加到渲染器中
+        scene.add(light);
+    }
+
+    //立方体
+    var cube;
+    function initObject() {
+        var geometry = new THREE.CubeGeometry(50, 50, 50);
+        var material = new THREE.MeshLambertMaterial({ color: 0xff0000 });
+        cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+        //设置立方体的位置和放置角度
+        cube.position.set(0, 0, 0);
+        cube.rotation.set(0.6, 0.8, 0);
+    }
+
+    //ThreeJs的启动过程
+    $(function () {
+        initRenderer();//初始化渲染器
+        initCamera();//初始化相机
+        initScene();//初始化场景
+        initLight();//初始化灯光
+        initObject();//初始化物体
+        //渲染开始
+        render();
+
+        window.addEventListener('resize', onWindowResize);
+    });
+
+    function onWindowResize() {
+        var width = $("#showarea").width();
+        var height = $("#showarea").height();
+
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height);
+    }
+
+    function render() {
+        //cube.rotation.x += 0.01;
+        cube.rotation.y += 0.01;
+
+        //此为浏览器支持的方法，用于请求动画帧
+        requestAnimationFrame(render);
+        //渲染一帧
+        renderer.render(scene, camera);
+    }
+
+
+
+    function zoomIn() {
+        camera.position.z -= 10;
+        camera.updateProjectionMatrix();
+    }
+
+    function zoomOut() {
+        camera.position.z += 10;
+        camera.updateProjectionMatrix();
+    }
+
+    function zoomIn2() {
+        camera.fov -= 10;
+        camera.updateProjectionMatrix();
+    }
+
+    function zoomOut2() {
+        camera.fov += 10;
+        camera.updateProjectionMatrix();
+    }
+
+
+
+    var isUseCanvas = false;
+
+    function ChangeToCanvas() {
+        isUseCanvas = true;
+        initRenderer();
+    }
+
+    function ChangeToWebGL() {
+        location.href = location.href;
+    }
+</script>
+
+<h2 class="page-header"> WebGL 类库 - Three.js 测试&nbsp;&nbsp;<small>@Html.ActionLink("示例1", "ThreeJS_Demo1")</small></h2>
+
+<div id="showarea">
+
+</div>
+
+<div>
+    <input type="button" value="拉近" onclick="zoomIn()" />
+    <input type="button" value="推远" onclick="zoomOut()" />
+    <input type="button" value="使用Canvas" onclick="ChangeToCanvas()" />
+    <input type="button" value="使用WebGL" style="display: none" onclick="ChangeToWebGL()" />
+</div>
+

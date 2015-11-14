@@ -1,0 +1,257 @@
+﻿@{
+    ViewBag.Title = "WebRTC测试";
+}
+<script>
+    var RtcConnect = function (_userId, _webSocketHelper) {
+
+        var config = { iceServers: [{ url: 'stun:112.124.26.122' }] };
+        var peerConnection = null;
+        var userId = _userId;
+        var webSocketHelper = _webSocketHelper;
+
+        var init = function () {
+
+            //兼容浏览器的PeerConnection写法
+            var RTCPeerConnection = window.PeerConnection || window.RTCPeerConnection || window.webkitPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection;
+
+            //创建PeerConnection实例
+            peerConnection = new RTCPeerConnection(config);
+
+            //如果检测到媒体流连接到本地，将其绑定到一个video标签上输出
+            peerConnection.onaddstream = function (event) {
+                if (event.stream) {
+                    createVideo(event.stream, "远程");
+                }
+            };
+
+            //发送ICE候选到其他客户端
+            peerConnection.onicecandidate = function (event) {
+                var description = JSON.stringify(event.candidate);
+                var message = JSON.stringify({ type: 4, userId: userId, description: description });
+                webSocketHelper.send(message);
+            };
+
+            //获取本地的媒体流，并绑定到一个video标签上输出，并且发送这个媒体流给其他客户端
+            navigator.getMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+            //相关文档：https://developer.mozilla.org/zh-CN/docs/WebRTC/navigator.getUserMedia
+            if (navigator.getMedia) {
+                //获取媒体
+                navigator.getMedia(
+                    //要求的权限
+                    {
+                        video: true,
+                        audio: true
+                    },
+                    //成功
+                    function (stream) {
+                        createVideo(stream, "本地");
+                        peerConnection.addStream(stream);
+                    },
+                    //失败
+                    function (error) {
+                        console.error("获取视频出错1：" + error);
+                    });
+            }
+            else {
+                $("#container").append("<h1>对不起，暂不支持您的浏览器！</h1>");
+            }
+        };
+
+        this.connect = function () {
+            peerConnection.createOffer(function (offer) {
+                peerConnection.setLocalDescription(offer);
+
+                var description = JSON.stringify(offer);
+                var message = JSON.stringify({ type: 2, userId: userId, description: description });
+                webSocketHelper.send(message);
+            });
+
+        };
+
+        this.acceptOffer = function (offer) {
+            peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+
+            peerConnection.createAnswer(function (answer) {
+                peerConnection.setLocalDescription(answer);
+
+                var description = JSON.stringify(answer);
+                var message = JSON.stringify({ type: 3, userId: userId, description: description });
+                webSocketHelper.send(message);
+            });
+        };
+
+        this.acceptAnswer = function (answer) {
+            peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+        };
+
+        this.addIceCandidate = function (candidate) {
+            if (candidate) {
+                peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+            }
+        };
+
+        init();
+
+    };
+
+    var WebSocketHelper = function (callback) {
+        var ws = null;
+        var url = "ws://" + document.location.host + "@WebHelper.RootUrl" + "api/WebRTC/Connect";
+
+        var init = function () {
+            ws = new WebSocket(url);
+            ws.onmessage = onmessage;
+        };
+
+        var onmessage = function (message) {
+            callback(JSON.parse(message.data));
+        };
+
+        this.send = function (data) {
+            ws.send(data);
+        };
+
+        init();
+    };
+
+    $(function () {
+
+        var rtcConnections = {};
+        var webSocketHelper = new WebSocketHelper(function (message) {
+            var connection = getOrCreateRtcConnect(message.userId);
+            switch (message.type) {
+                case 0: //Conect
+                    connection.connect();
+                    break;
+                case 2: //Offer
+                    connection.acceptOffer(JSON.parse(message.description));
+                    break;
+                case 3: //Answer
+                    connection.acceptAnswer(JSON.parse(message.description));
+                    break;
+                case 4: //IceCandidate
+                    connection.addIceCandidate(JSON.parse(message.description));
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        var getOrCreateRtcConnect = function (userId) {
+            var connection = rtcConnections[userId];
+            if (typeof (connection) == 'undefined') {
+                connection = new RtcConnect(userId, webSocketHelper);
+                rtcConnections[userId] = connection;
+            }
+            return connection;
+        };
+
+        //showSelfVideo();
+    });
+
+    //显示自己的视频流
+    function showSelfVideo() {
+        navigator.getMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+        //相关文档：https://developer.mozilla.org/zh-CN/docs/WebRTC/navigator.getUserMedia
+        if (navigator.getMedia) {
+            //获取媒体
+            navigator.getMedia(
+                //要求的权限
+                {
+                    video: true,
+                    audio: true
+                },
+                //成功
+                function (stream) {
+                    createVideo(stream, "测试");
+                },
+                //失败
+                function (error) {
+                    console.error("获取视频出错1：" + error);
+                });
+        }
+        else {
+            $("#container").append("<h1>对不起，暂不支持您的浏览器！</h1>");
+        }
+    }
+
+    //创建视频
+    function createVideo(stream, name) {
+        //新建视频标签
+        var video = $("<video />");
+
+        //不同浏览器对视频流的不同处理
+        if (navigator.mozGetUserMedia) {
+            video.prop("mozSrcObject", stream);
+        } else {
+            var vendorURL = window.URL || window.webkitURL;
+            video.attr("src", vendorURL ? vendorURL.createObjectURL(stream) : stream);
+        }
+
+        video.click(function (e) {
+            takePhoto(this, this.videoWidth, this.videoHeight);
+        });
+
+        //添加到页面
+        $("<div />").addClass("video_border").append("<h3>" + name + "</h3>").append(video).appendTo("#container");
+
+        //开始播放
+        video.get(0).play();
+    }
+
+    //照相。。
+    function takePhoto(video, width, height) {
+        //设置画布
+        var canvas = $("<canvas/>").get(0);
+        canvas.width = width / 2;
+        canvas.height = height / 2;
+
+        //在画布上绘制图像
+        canvas.getContext('2d').drawImage(video, 0, 0, width / 2, height / 2);
+
+        //将图像转为data:image形式
+        var data = canvas.toDataURL('image/png');
+
+        //设置img标签
+        var photo = $("<img/>");
+        photo.attr('src', data);
+
+        //添加到页面
+        $("<div />").addClass("photo_border").append(photo).appendTo("#container");
+    }
+</script>
+
+<style>
+    .video_border {
+        float: left;
+        margin: 5px;
+    }
+
+        .video_border > video {
+            width: 640px;
+            height: 480px;
+        }
+
+    .photo_border {
+        float: left;
+        margin: 5px;
+    }
+
+        .photo_border > img {
+            width: 320px;
+            height: 240px;
+        }
+
+    #container {
+        min-height: 500px;
+        min-width: 500px;
+    }
+</style>
+
+<h2 class="page-header">WebRTC测试（测试未成功）</h2>
+
+<div id="container">
+
+</div>

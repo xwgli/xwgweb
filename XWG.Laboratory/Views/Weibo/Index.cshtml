@@ -1,0 +1,148 @@
+﻿@{
+    ViewBag.Title = "微博测试";
+}
+
+<script>
+    function publishWeibo() {
+        var content = $("#weibo_content").val();
+        if (content.length <= 0) {
+            alert("请填写微博内容");
+            return;
+        }
+        $.ajax({
+            url: "@ViewBag.PublishUrl",
+            type: "post",
+            data: { content: content },
+            success: function (data) {
+                $("#publish_response").text(data);
+            }
+        });
+    }
+    function urlShorten() {
+        var short_url = $("#short_url").val();
+        if (short_url.length <= 0) {
+            alert("请填写URL！");
+            return;
+        }
+        $.ajax({
+            url: "@ViewBag.UrlShortenUrl",
+            type: "post",
+            data: { url_long: short_url },
+            success: function (data) {
+                $("#short_url_response").text(data);
+            }
+        });
+    }
+    function urlExpand() {
+        var short_url = $("#short_url").val();
+        if (short_url.length <= 0) {
+            alert("请填写URL！");
+            return;
+        }
+        $.ajax({
+            url: "@ViewBag.UrlExpandUrl",
+            type: "post",
+            data: { url_short: short_url },
+            success: function (data) {
+                $("#short_url_response").text(data);
+            }
+        });
+    }
+    function urlShareCount() {
+        var short_url = $("#short_url").val();
+        if (short_url.length <= 0) {
+            alert("请填写URL！");
+            return;
+        }
+        $.ajax({
+            url: "@ViewBag.UrlShareCountUrl",
+            type: "post",
+            data: { url_short: short_url },
+            success: function (data) {
+                $("#short_url_response").text(data);
+            }
+        });
+    }
+    function getEmotions() {
+        $.ajax({
+            url: "@ViewBag.GetEmotionsUrl",
+            type: "post",
+            data: { type: "face" },
+            success: function (data) {
+                $("#emotions_response").text(data);
+            }
+        });
+    }
+</script>
+
+<h2 class="page-header">微博测试</h2>
+
+<h2>
+    <a href="@ViewBag.AuthorizeUrl">授权测试</a>
+</h2>
+
+@if (!string.IsNullOrWhiteSpace(ViewBag.AccessToken))
+{
+    <hr />
+    <div>
+        <h2>
+            <a href="@ViewBag.CancelAuthUrl">取消授权</a>
+        </h2>
+        <h2>
+            <a href="@ViewBag.NewAuthorizeUrl">重新登录授权</a>
+        </h2>
+    </div>
+
+
+    <hr />
+    <div>
+        <h3>
+            结果：@ViewBag.AuthResponse
+        </h3>
+        <h2>
+            <a href="@ViewBag.GetAuthInfoUrl">查看授权</a>
+        </h2>
+        <h2>
+            <a href="@ViewBag.GetUserInfoUrl">用户信息</a>
+        </h2>
+        <h2>
+            <a href="@ViewBag.GetUserLimitUrl">用户接口限制</a>
+        </h2>
+    </div>
+
+    
+    <hr />
+    <div>
+        <h3>结果：<span id="publish_response"></span></h3>
+        <div class="form-group">
+            <textarea id="weibo_content" maxlength="140" class="form-control" rows="5"></textarea>
+        </div>
+        <div class="form-group">
+            <input type="button" class="btn btn-primary" value="发微博" onclick="publishWeibo()" />
+        </div>
+    </div>
+
+
+    <hr />
+    <div>
+        <h3>结果：<span id="short_url_response"></span></h3>
+        <h3>输入URL：</h3>
+        <div class="form-group">
+            <input id="short_url" class="form-control" />
+        </div>
+        <div class="form-group">
+            <input type="button" class="btn btn-primary" value="转换为短链" onclick="urlShorten()" />
+            <input type="button" class="btn btn-primary" value="将短链还原" onclick="urlExpand()" />
+            <input type="button" class="btn btn-primary" value="获取短链分享数" onclick="urlShareCount()" />
+        </div>
+    </div>
+
+
+    <hr />
+    <div>
+        <h3>结果：<span id="emotions_response"></span></h3>
+        <div class="form-group">
+            <input type="button" class="btn btn-primary" value="获取表情" onclick="getEmotions()" />
+        </div>
+    </div>
+}

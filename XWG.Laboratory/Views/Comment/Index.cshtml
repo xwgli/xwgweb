@@ -1,0 +1,239 @@
+﻿@{
+    ViewBag.Title = "评论测试";
+}
+
+@Scripts.Render("~/jquery/js/scrollto")
+
+<script>
+    //添加评论地址
+    var addUrl = "@Url.Action("Add")";
+
+    //获取评论地址
+    var getUrl = "@Url.Action("Get")";
+
+    //每页评论条数
+    var rowCount = 10;
+
+    //添加评论
+    function addComment() {
+
+        //移除错误提示
+        var cTip = $("#comment_tip").val("").removeClass("comment_error").removeClass("comment_success");
+        var cNickname = $("#nickname").removeClass("comment_error");
+        var cComment = $("#comment").removeClass("comment_error");
+
+        //获取输入内容
+        var nickname = cNickname.val().trim();
+        var comment = cComment.val().trim();
+
+        //检查输入合法性
+        if (nickname.length <= 0) {
+            cNickname.addClass("comment_error");
+            cTip.addClass("comment_error");
+            cTip.text("请输入昵称");
+            return;
+        }
+        if (comment.length <= 0) {
+            cComment.addClass("comment_error");
+            cTip.addClass("comment_error");
+            cTip.text("请输入评论内容");
+            return;
+        }
+
+        var cForm = $("#comment_form fieldset");
+
+        //开始提交，禁止修改
+        cForm.attr("disabled", "disabled");
+        cTip.text("评论发表中。。。");
+
+        $.ajax({
+            url: addUrl,
+            data: { nickname: nickname, comment: comment, pageId: 1 },
+            type: "post",
+            success: function (data) {
+                //检查提交结果
+                if (data && (data.RecordId > 0)) {
+                    //提示评论成功
+                    cComment.val("");
+                    cTip.addClass("comment_success");
+                    cTip.text("评论成功！");
+                    cForm.removeAttr("disabled");
+
+                    //检查倒序
+                    var desc = $("#comment_list_desc").prop("checked");
+
+                    //跳转到最后一页评论
+                    getComments(desc ? 1 : 9999, rowCount, !desc, data.RecordId);
+                }
+                else {
+                    //提示评论失败
+                    cTip.addClass("comment_error");
+                    cTip.text("评论失败！");
+                    cForm.removeAttr("disabled");
+                }
+            }
+        });
+    }
+
+    //拼接并返回一条评论的html代码
+    function showComment(num, record) {
+        var title = '<div><h5><b>' + num + '楼</b> ' + record.Nickname + '(' + record.IP + ') ' + ConvertJSONDateToJSDate(record.CommentTime).format("yyyy-MM-dd hh:mm:ss") + '</h5></div>';
+        var comment = '<div>' + record.Comment + '</div>';
+        var hr = '<hr class="comment_item_hr" />';
+        var html = '<div id="comment_item_' + record.RecordId + '">' + title + comment + '</div>' + hr;
+        //$("#comment_area").append(html);
+        return html;
+    }
+
+    //拼接分页功能的html代码
+    function showPager(page, count, total) {
+        var totalPage = Math.ceil(total / count);
+
+        //页数/总页数
+        var num = page + ' / ' + totalPage;
+
+        var isFirstPage = (totalPage <= 1) || (page <= 1);
+        var isLastPage = (totalPage <= 1) || (page >= totalPage);
+
+        var pClick = 'onclick="getComments(' + (page - 1) + ',' + count + ',true)"';
+        var nClick = 'onclick="getComments(' + (page + 1) + ',' + count + ',true)"';
+
+        //上一页/下一页
+        var previous = '<li class="previous ' + (isFirstPage ? "disabled" : "") + '"><a href="javascript:;" ' + (isFirstPage ? "" : pClick) + '>&larr; 前一页</a></li>';
+        var next = '<li class="next ' + (isLastPage ? "disabled" : "") + '"><a href="javascript:;" ' + (isLastPage ? "" : nClick) + '>后一页 &rarr;</a></li>';
+
+        //拼接
+        var pager = previous + num + next;
+        $('#comment_pager').html(pager);
+    }
+
+    //根据参数获取评论数据
+    function getComments(page, count, scroll, scrollToId) {
+        //$("#comment_area").html("评论加载中。。。");
+
+        //查询结果倒序
+        var desc = $("#comment_list_desc").prop("checked");
+
+        $.ajax({
+            url: getUrl,
+            data: { current: page, count: count, pageId: 1, options: JSON.stringify({ desc: desc }) },
+            type: "post",
+            success: function (data) {
+
+                //拼接评论数据
+                var html = "";
+                if (data && data.Items) {
+                    for (var i = 0; i < data.Items.length; i++) {
+                        var record = data.Items[i];
+                        html += showComment(record.num, record.r);
+                    }
+                }
+                else {
+                    html = "暂无评论！";
+                }
+                $("#comment_area").html(html);
+
+                //拼接分页控件
+                showPager(data.CurrentPage, count, data.Total);
+
+                //是否滚动到指定位置
+                if (scroll) {
+                    if (!scrollToId) {
+                        $.scrollTo('#comment_list_title', 100, { offset: -50 });
+                    }
+                    $.scrollTo('#comment_item_' + scrollToId, 100, { offset: -50 });
+                }
+            }
+        });
+    }
+
+    $(function () {
+        //页面加载完成后，自动加载第一页评论
+        getComments(1, rowCount);
+    });
+</script>
+
+<style>
+    .com_border_no_radius {
+        border-radius: 0;
+    }
+
+    .com_width_full {
+        width: 100%;
+    }
+
+    .com_textarea_no_resize {
+        resize: none;
+    }
+
+    .comment_error {
+        color: #a94442;
+        border-color: #a94442;
+    }
+
+    .comment_success {
+        color: #3c763d;
+    }
+
+    .comment_border {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .comment_title {
+        margin-top: 20px;
+    }
+
+    .comment_title_hr {
+        margin-top: 5px;
+    }
+
+    .comment_item_hr {
+        border-style: dotted;
+    }
+
+    #comment_area {
+        margin-bottom: 20px;
+    }
+
+    #comment_desc {
+        margin-left: 20px;
+        font-size: 12px;
+    }
+
+    #comment_list_desc {
+        height: 15px;
+        width: 15px;
+        vertical-align: bottom;
+        margin-right: 5px;
+    }
+</style>
+
+<h2 class="page-header">评论测试</h2>
+
+<div>
+    呃，这个页面就是用来测试评论的，所以，赶快在下面添加评论吧！
+</div>
+
+<hr />
+<div class="comment_border">
+    <!--添加评论区域-->
+    <h4 class="comment_title">发表评论&nbsp;&nbsp;<small id="comment_tip"></small></h4>
+    <form id="comment_form">
+        <fieldset>
+            <input type="text" class="form-control com_border_no_radius" id="nickname" placeholder="你的昵称">
+            <textarea class="form-control com_border_no_radius com_textarea_no_resize" id="comment" rows="3" placeholder="评论内容"></textarea>
+            <input type="button" class="btn btn-info com_border_no_radius com_width_full" value="发表评论" onclick="addComment()" />
+        </fieldset>
+    </form>
+
+    <h4 id="comment_list_title" class="comment_title">评论列表<label id="comment_desc"><input id="comment_list_desc" type="checkbox" onchange="getComments(1, rowCount);" />倒序</label></h4>
+    <hr class="comment_title_hr" />
+    <!--评论列表区域-->
+    <div id="comment_area">
+        评论加载中。。。
+    </div>
+    <!--分页功能区域-->
+    <ul id="comment_pager" class="pager"></ul>
+</div>
+<div class="clearfix"></div>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="4a99df2120a849ab94a0be68f5656f28" Name="Diagram1" >
+        <EntityTypeShape EntityType="XwgWebDBModel.tbl_ChatRecord" Width="2.25" PointX="11.625" PointY="4.5" />
+        <EntityTypeShape EntityType="XwgWebDBModel.tbl_CommentPage" Width="2.625" PointX="0.75" PointY="0.75" />
+        <EntityTypeShape EntityType="XwgWebDBModel.tbl_VisitRecord" Width="2" PointX="7.125" PointY="0.625" />
+        <AssociationConnector Association="XwgWebDBModel.FK_聊天记录与访问者关联" />
+        <EntityTypeShape EntityType="XwgWebDBModel.tbl_CommentRecord" Width="2" PointX="3.75" PointY="3.125" />
+        <AssociationConnector Association="XwgWebDBModel.FK_评论记录与评论页面关联" />
+        <AssociationConnector Association="XwgWebDBModel.FK_评论记录与访问记录关联" />
+        <EntityTypeShape EntityType="XwgWebDBModel.tbl_WeixinRecord" Width="1.5" PointX="0.75" PointY="3.75" />
+        <EntityTypeShape EntityType="XwgWebDBModel.tbl_WeixinTextMessage" Width="1.5" PointX="3" PointY="7.125" />
+        <EntityTypeShape EntityType="XwgWebDBModel.tbl_WeixinUser" Width="1.5" PointX="0.75" PointY="7" />
+        <AssociationConnector Association="XwgWebDBModel.FK_tbl_WeixinTextMessage_tbl_WeixinUser" />
+        <EntityTypeShape EntityType="XwgWebDBModel.tbl_WeixinQa" Width="1.5" PointX="3" PointY="10.25" />
+        <AssociationConnector Association="XwgWebDBModel.FK_tbl_WeixinQa_tbl_WeixinUser" />
+        </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

@@ -1,0 +1,27 @@
+﻿@{
+    ViewBag.Title = "文件上传 - FileUpload 测试";
+}
+
+<h2 class="page-header">文件上传 - FileUpload 测试（未完成）</h2>
+
+<br />
+<h4>普通：</h4>
+<input type="file" />
+
+<br />
+<h4>设置接受文件类型：</h4>
+<input type="file" accept="image/*" />
+
+
+<br />
+<h4>设置capture属性：</h4>
+<h5>照相：</h5>
+<input type="file" accept="image/*" capture="camera" />
+
+<br />
+<h5>录像：</h5>
+<input type="file" accept="video/*" capture="camcorder" />
+
+<br />
+<h5>录音：</h5>
+<input type="file" accept="audio/*" capture="microphone" />

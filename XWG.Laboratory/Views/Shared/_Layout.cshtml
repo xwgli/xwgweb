@@ -1,0 +1,272 @@
+﻿@{
+    var root = WebHelper.RootUrl;
+    var croot = WebHelper.CurrentHostRootUrl;
+}
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <!--↓↓↓固定到任务栏使用↓↓↓-->
+    <!--提示文本-->
+    <meta name="msapplication-tooltip" content="小网格实验室" />
+    <!--网站起始页-->
+    <meta name="msapplication-starturl" content="@(root)" />
+    <!--导航按钮颜色-->
+    <meta name="msapplication-navbutton-color" content="#FEAB07" />
+    <!--右键任务列表-->
+    <meta content="name=实验室首页;action-uri=@(root);icon-uri=@(root)/favicon.ico" name="msapplication-task" />
+    <meta content="工具" name="msapplication-task-separator" />
+    <meta content="name=在线小工具;action-uri=@(root)Tools;icon-uri=@(root)favicon.ico" name="msapplication-task" />
+
+    <!--↓↓↓固定到开始菜单使用↓↓↓-->
+    <!--默认名称-->
+    <meta name="application-name" content="小网格实验室" />
+    <!--磁贴背景色-->
+    <meta name="msapplication-TileColor" content="#FEAB07" />
+    <!--磁贴图片-->
+    <meta name="msapplication-square70x70logo" content="~/Images/128x128.png" />
+    <meta name="msapplication-square150x150logo" content="~/Images/270x270.png" />
+    <meta name="msapplication-wide310x150logo" content="~/Images/558x270.png" />
+    <meta name="msapplication-square310x310logo" content="~/Images/558x558.png" />
+
+    <!--更多：http://msdn.microsoft.com/zh-cn/library/ie/dn455115(v=vs.85).aspx-->
+    @*<meta name="msapplication-config" content="~/browserconfig.xml" />*@
+
+    <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+
+    <title>@ViewBag.Title</title>
+
+    <script type="text/javascript">
+        
+        window.appInsights = {
+            queue: [],
+            applicationInsightsId: null,
+            accountId: null,
+            appUserId: null,
+            configUrl: null,
+            start: function (n) {
+
+                function u(n) {
+                    t[n] = function () {
+                        var i = arguments; t.queue.push(function () {
+                            t[n].apply(t, i);
+                        });
+                    }
+                }
+
+                function f(n, t) {
+                    if (n) {
+                        var u = r.createElement(i);
+                        u.type = "text/javascript";
+                        u.src = n;
+                        u.async = !0;
+                        u.onload = t;
+                        u.onerror = t;
+                        r.getElementsByTagName(i)[0].parentNode.appendChild(u);
+                    }
+                    else {
+                        t();
+                    }
+                }
+
+                var r = document, t = this, i;
+                t.applicationInsightsId = n;
+                u("logEvent");
+                u("logPageView");
+                i = "script";
+                f(t.configUrl, function () {
+                    f("//az416426.vo.msecnd.net/scripts/v/ai.0.7.js");
+                });
+                t.start = function () { }
+            }
+        };
+
+        appInsights.start("ee876f05-d9aa-47c9-97fb-f6c066f55cd2");
+
+        appInsights.logPageView();
+
+    </script>
+
+    @Scripts.Render("~/jquery/js")
+    @Scripts.Render("~/bootstrap/js")
+    @Scripts.Render("~/modernizr/js")
+    @Scripts.Render("~/custom/js")
+    @Styles.Render("~/bootstrap/css")
+
+    @RenderSection("Scripts", required: false)
+
+    <style>
+        body {
+            font-family: Microsoft YaHei;
+        }
+
+        .body-content {
+            padding-top: 50px;
+            padding-bottom: 20px;
+        }
+
+        .body-sm-blank {
+            height: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                @Html.ActionLink("小网格实验室", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="/">首页</a></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">在线小工具<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li>@Html.ActionLink("二维码生成/读取", "QRcode", "Tools")</li>
+                            <li>@Html.ActionLink("JSON格式化", "FormatJSON", "Tools")</li>
+                            <li class="divider"></li>
+                            <li>@Html.ActionLink("Url编码/解码", "EncodeUrl", "Tools")</li>
+                            <li>@Html.ActionLink("Html编码/解码", "EncodeHtml", "Tools")</li>
+                            <li>@Html.ActionLink("Unicode编码/解码", "EncodeUnicode", "Tools")</li>
+                            <li class="divider"></li>
+                            <li>@Html.ActionLink("查看当前会话信息", "GetInfo", "Tools")</li>
+                            <li class="divider"></li>
+                            <li>@Html.ActionLink("小网格云存储", "XWGCloud", "Tools")</li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">HTML5测试<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li>@Html.ActionLink("WebGL测试（Three.js）", "ThreeJS", "HTML5")</li>
+                            <li class="divider"></li>
+                            <li>@Html.ActionLink("音频测试（Buzz）", "Buzz", "HTML5")</li>
+                            <li class="divider"></li>
+                            <li>@Html.ActionLink("WebRTC测试", "WebRTC", "HTML5")</li>
+                        </ul>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">以前的测试<span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                            <li>@Html.ActionLink("微博测试", "Index", "Weibo")</li>
+                            <li>@Html.ActionLink("微信浏览器测试", "BrowserTest", "Weixin")</li>
+                            <li class="divider"></li>
+                            <li>@Html.ActionLink("聊天室测试", "Index", "Room")</li>
+                            <li>@Html.ActionLink("SignalR 示例1", "SignalR_Demo1", "Home")</li>
+                            <li class="divider"></li>
+                            <li>@Html.ActionLink("文件上传测试", "FileUpload", "Home")</li>
+                            <li>@Html.ActionLink("页面滚动测试", "Scroll", "Home")</li>
+                            <li>@Html.ActionLink("延时载图测试", "LazyLoadImageTest", "Home")</li>
+                            <li>@Html.ActionLink("富文本编辑器测试", "RTF", "Home")</li>
+                            <li>@Html.ActionLink("幻灯片测试", "Slideshow", "Home")</li>
+                            <li class="divider"></li>
+                            <li>@Html.ActionLink("评论测试", "Index", "Comment")</li>
+                        </ul>
+                    </li>
+                    <li>@Html.ActionLink("排队系统", "Index", "Queue")</li>
+                    <li>@Html.ActionLink("API", "Index", "Help", new { area = "HelpPage" }, null)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    @*<div class="visible-sm body-sm-blank"></div>*@
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year 小网格工作室</p>
+        </footer>
+    </div>
+
+    @Scripts.Render("~/weixin/api")
+
+    <script>
+
+        var root = "@croot";
+
+        // 需要分享的内容，请放到ready里
+        WeixinApi.ready(function (Api) {
+
+            // 微信分享的数据
+            var wxData = {
+                "appId": "", // 服务号可以填写appId
+                "imgUrl": root + 'images/weixin.png',
+                "link": root,
+                "desc": '点我访问小网格实验室',
+                "title": "小网格实验室"
+            };
+
+            // 分享的回调
+            var wxCallbacks = {
+                // 收藏操作是否触发回调，默认是开启的
+                favorite: false,
+
+                // 用async模式，表示每次分享之前，都需要更新分享内容
+                //async: true,
+
+                //// 分享操作开始之前
+                //ready: function () {
+                //    // 你可以在这里对分享的数据进行动态修改：*可以只修改某些字段*
+                //    alert("准备分享");
+                //    // 下面我们只修改标题和图片地址
+                //    this.dataLoaded({
+                //        title: '在这里可以单独修改其中的title字段',
+                //        imgUrl: root + 'images/weixin.png'
+                //    });
+                //},
+
+                // 分享操作开始之前
+                ready: function () {
+                    // 你可以在这里对分享的数据进行重组
+                    alert("准备分享");
+                },
+                // 分享被用户自动取消
+                cancel: function (resp) {
+                    // 你可以在你的页面上给用户一个小Tip，为什么要取消呢？
+                    alert("分享被取消，msg=" + resp.err_msg);
+                },
+                // 分享失败了
+                fail: function (resp) {
+                    // 分享失败了，是不是可以告诉用户：不要紧，可能是网络问题，一会儿再试试？
+                    alert("分享失败，msg=" + resp.err_msg);
+                },
+                // 分享成功
+                confirm: function (resp) {
+                    // 分享成功了，我们是不是可以做一些分享统计呢？
+                    alert("分享成功，msg=" + resp.err_msg);
+                },
+                // 整个分享过程结束
+                all: function (resp, shareTo) {
+                    // 如果你做的是一个鼓励用户进行分享的产品，在这里是不是可以给用户一些反馈了？
+                    alert("分享" + (shareTo ? "到" + shareTo : "") + "结束，msg=" + resp.err_msg);
+                }
+            };
+
+            // 用户点开右上角popup菜单后，点击分享给好友，会执行下面这个代码
+            Api.shareToFriend(wxData, wxCallbacks);
+
+            // 点击分享到朋友圈，会执行下面这个代码
+            Api.shareToTimeline(wxData, wxCallbacks);
+
+            // 点击分享到腾讯微博，会执行下面这个代码
+            Api.shareToWeibo(wxData, wxCallbacks);
+
+            // iOS上，可以直接调用这个API进行分享，一句话搞定
+            Api.generalShare(wxData, wxCallbacks);
+
+            // 激活WeixinApi的hook功能
+            Api.hook.enable(wxData, wxCallbacks);
+        });
+    </script>
+
+</body>
+</html>

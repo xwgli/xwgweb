@@ -1,0 +1,255 @@
+﻿@{
+    Layout = null;
+}
+
+@Scripts.Render("~/jquery/js")
+@Scripts.Render("~/jquery/js/easing")
+@Scripts.Render("~/jquery/js/scrollify")
+
+<html>
+<head>
+    <title>滚动测试</title>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <script>
+
+        /*
+        作者：李宏
+        时间：2014-05-27
+        说明：自动固定元素在顶部（当页面滚动至不能完全显示元素时，将元素固定在页面（可视部分）的顶部）
+        样式：
+            .com_position_fixed_top { position: fixed; top: 0; z-index: 8888; width: 100%; }
+        参数：
+            boxId：要固定的元素的Id
+            borderId：与要固定的元素位置相同的元素（用于检测什么时候取消固定元素在顶部）
+        */
+        function autoFixedBoxOnTop(boxId, borderId) {
+            var cssClass = "com_position_fixed_top";
+            $(window).scroll(function () {
+                var topClass = cssClass;
+
+                //要固定在顶部的元素
+                var fixedBox = $("#" + boxId);
+                var fixedBorder = $("#" + borderId);
+
+                //判断元素是否存在
+                if ((fixedBox.length > 0) && (fixedBorder.length > 0)) {
+
+                    //获取页面滚动后顶部不可见部分的高度
+                    var scrollTop = document.documentElement.scrollTop || window.pageYOffset || document.body.scrollTop;
+
+                    //计算表头是否处于页面不可见部分
+                    var isHidden = fixedBox.offset().top <= scrollTop;
+                    if (isHidden) {
+                        //应用相应样式
+                        fixedBox.addClass(topClass);
+                    }
+
+                    //计算表格顶部是否完全处于页面可见部分
+                    var isShow = fixedBorder.offset().top >= scrollTop;
+                    if (isShow) {
+                        //应用相应样式
+                        fixedBox.removeClass(topClass);
+                    }
+                }
+            }).trigger('scroll');
+        }
+
+        //根据显示大小定义块大小，并居中显示文字
+        function autoResizeBlock() {
+            $(window).resize(function () {
+                var bodyHeight = document.body.clientHeight;
+                var topHeight = $("#boxborder").height();
+                var blockHeight = bodyHeight - topHeight;
+                $(".scroll_block").not(".blank").css("padding-top", 0).height(blockHeight);
+
+                var h1Height = $(".scroll_block h1").height();
+                $(".scroll_block").not(".blank").css("padding-top", (blockHeight / 2 - h1Height) + "px");
+            }).trigger("resize");
+        }
+
+        //自动显示滚动百分比
+        function autoShowPercentage() {
+            $("<div id='percentageCounter'>0%</div>").appendTo("body");
+            $(window).scroll(function () {
+                var scrollTop = $(window).scrollTop();
+                var docHeight = $(document).height();
+                var bodyHeight = document.body.clientHeight;
+
+                var scrollPercent = (scrollTop / (docHeight - bodyHeight)) * 100;
+                scrollPercent = scrollPercent.toFixed(1);
+
+                $('#percentageCounter').text(scrollPercent + "%");
+            }).trigger('scroll');
+        }
+
+        $(function () {
+            autoFixedBoxOnTop("box", "boxborder");
+
+            autoResizeBlock();
+
+            autoShowPercentage();
+
+            var topHeight = $("#boxborder").height();
+
+            //区域间滚动
+            $.scrollify({
+                //区域选择器
+                section: ".scroll_block",
+                //区域唯一标识（data-xxx中的xxx）
+                sectionName: "name",
+                //动画效果
+                easing: "easeOutExpo",
+                //速度
+                scrollSpeed: 1100,
+                //位移
+                offset: -topHeight,
+                //是否显示滚动条
+                scrollbars: true,
+                //滚动前
+                before: function () { },
+                //滚动后
+                after: function () { },
+                resize: true
+            });
+        });
+
+        //直接滚动到某区域
+        function gotoBlock(name) {
+            //这里的name要和sectionName保持一致，前面带#号
+            $.scrollify("move", name);
+            if (top != window) {
+                setTimeout(function () {
+                    var message = "页面：" + $("body").height() + "，已滚：" + $("body").scrollTop() + "，元素：" + $(name.replace("section_", "")).offset().top;
+                    top.test(message);
+                }, 1200);
+            }
+        }
+
+    </script>
+
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        div {
+            box-sizing: border-box;
+        }
+
+        #top {
+            padding: 20px 5px;
+            height: 80px;
+            color: white;
+            font-size: xx-large;
+            background-color: rgb(133,12,114);
+        }
+
+        .com_position_fixed_top {
+            position: fixed;
+            top: 0;
+            z-index: 8888;
+            width: 100%;
+        }
+
+        #boxborder {
+            height: 30px;
+            background-color: greenyellow;
+        }
+
+        #box {
+            padding: 5px;
+            height: 30px;
+            background-color: rgb(174,93,161);
+        }
+
+        a {
+            cursor: pointer;
+            color: white;
+            font-size: 16px;
+        }
+
+        #content {
+            background-color: yellowgreen;
+        }
+
+        .scroll_block {
+            width: 100%;
+        }
+
+            .scroll_block h1 {
+                text-align: center;
+                color: white;
+                font-size: xx-large;
+            }
+
+            .scroll_block.red {
+                background-color: rgb(197,33,44);
+            }
+
+            .scroll_block.blue {
+                background-color: rgb(24,155,223);
+            }
+
+            .scroll_block.yellow {
+                background-color: rgb(243,152,0);
+            }
+
+            .scroll_block.green {
+                background-color: rgb(50,177,108);
+            }
+
+        #bottom {
+            padding: 5px;
+            height: 30px;
+            background-color: rgb(166,20,30);
+            color: white;
+            font-size: 16px;
+        }
+
+        #percentageCounter {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            font-size: xx-large;
+            color: white;
+        }
+    </style>
+
+</head>
+<body>
+    <div id="top" data-name="section_top" class="scroll_block blank">
+        滚动效果测试
+    </div>
+    <div id="boxborder">
+        <div id="box">
+            <a onclick="gotoBlock('#section_green')">绿色</a>
+            <a onclick="gotoBlock('#section_yellow')">黄色</a>
+            <a onclick="gotoBlock('#section_blue')">蓝色</a>
+            <a onclick="gotoBlock('#section_red')">红色</a>
+        </div>
+    </div>
+    <div id="content">
+        <div id="green" data-name="section_green" class="scroll_block green">
+            <h1>我是绿色</h1>
+        </div>
+        <div id="yellow" data-name="section_yellow" class="scroll_block yellow">
+            <h1>我是黄色</h1>
+        </div>
+        <div id="blue" data-name="section_blue" class="scroll_block blue">
+            <h1>我是蓝色</h1>
+        </div>
+        <div id="red" data-name="section_red" class="scroll_block red">
+            <h1>我是红色</h1>
+        </div>
+    </div>
+    <div id="bottom" data-name="section_bottom" class="scroll_block blank">
+        到底啦！
+    </div>
+</body>
+</html>

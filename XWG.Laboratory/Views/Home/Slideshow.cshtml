@@ -1,0 +1,213 @@
+﻿@{
+    ViewBag.Title = "幻灯片测试";
+}
+
+@Styles.Render("~/jquery/css/camera")
+
+@Scripts.Render("~/jquery/js/easing")
+@Scripts.Render("~/jquery/js/camera")
+
+<script>
+    //camera对于浏览器的判断是基于老版本jquery的browser属性，现已删除，需要修改
+    $.browser = true;
+
+    //camera中有一个方法：isMobile()，用于判断移动设备，是根据useragent判断的，可能需要更新。
+    //camera中，有两个live改on的地方需要检查是否需要处理：fakeHover
+
+    $(function () {
+
+        $('#camera_test').camera({
+
+            //高度
+            height: '500px',
+            //图片的最小高度？？？？
+            minHeight: '200px',
+
+
+
+            //显示页按钮
+            pagination: true,
+            //显示缩略图
+            thumbnails: false,
+
+            //为图片加遮罩层，阻止用户直接通过右键点击来保存图片
+            overlayer: false,
+            //不对图片进行拉伸（拉伸是按比例保证宽高填满区域）
+            portrait: true,
+            //图片在区域中的对齐方式（topLeft, topCenter, topRight, centerLeft, center, centerRight, bottomLeft, bottomCenter, bottomRight）
+            alignment: 'center',
+
+
+
+            //自动播放
+            autoAdvance: true,
+            //移动设备自动播放？
+            mobileAutoAdvance: false,
+            //自动播放的时间间隔（毫秒）
+            time: 1000,
+            //是否在鼠标悬浮时暂停播放（移动设备无）
+            hover: true,
+
+            //播放/暂停按钮
+            playPause: false,
+            //当单击幻灯片区域时，暂停播放（注：暂停后再次单击不会恢复）
+            pauseOnClick: false,
+
+            //导航（上/下一张）按钮
+            navigation: false,
+            //仅悬停时显示导航
+            navigationHover: false,
+            //移动设备仅悬停时显示导航
+            mobileNavHover: false,
+
+
+
+            //自动播放时的等待的进度条：pie（圈）、bar（条）
+            loader: 'pie',
+
+            //颜色
+            loaderColor: '#eeeeee',
+            //背景色
+            loaderBgColor: '#222222',
+            //透明度
+            loaderOpacity: .5,
+            //与背景的间距
+            loaderPadding: 2,
+            //宽度
+            loaderStroke: 15,
+
+            //pie的直径
+            pieDiameter: 138,
+            //bar的位置（rightTop, leftTop, leftBottom, rightBottom）
+            piePosition: 'rightBottom',
+
+            //bar的方向（leftToRight, rightToLeft, topToBottom, bottomToTop）
+            barDirection: 'topToBottom',
+            //bar的位置（left, right, top, bottom）
+            barPosition: 'right',
+
+
+
+
+            //切换效果的风格（所有风格在此：http://gsgd.co.uk/sandbox/jquery/easing/）
+            easing: "easeInOutElastic",
+            //如果移动设备的风格和电脑相同，请留空
+            mobileEasing: "",
+
+            //切换效果（random：随机）
+            /*
+                所有切换效果如下，可单独指定一个，也可指定多个，多个使用逗号分隔（例：fx:'curtainTopRight,curtainBottomLeft'）：
+                    random, simpleFade, curtainTopLeft, curtainTopRight, curtainBottomLeft,
+                    curtainBottomRight, curtainSliceLeft, curtainSliceRight, blindCurtainTopLeft,
+                    blindCurtainTopRight, blindCurtainBottomLeft, blindCurtainBottomRight,
+                    blindCurtainSliceBottom, blindCurtainSliceTop, stampede, mosaic,
+                    mosaicReverse, mosaicRandom, mosaicSpiral, mosaicSpiralReverse,
+                    topLeftBottomRight, bottomRightTopLeft, bottomLeftTopRight, bottomLeftTopRight,
+                    scrollLeft, scrollRight, scrollHorz, scrollBottom, scrollTop
+            */
+            fx: 'random',
+            //如果移动设备的效果和电脑相同，请留空
+            mobileFx: '',
+
+            //切换效果作用在：下一张(next)/上一张（即当前图片，prev)/随机(random)
+            slideOn: 'next',
+            //切换效果的播放时长（毫秒）
+            transPeriod: 1500,
+
+            //动画切块开始到消失之间的时长？？？？该值必须小于上面 transPeriod 的值
+            gridDifference: 250,
+            //动画切块淡入淡出，禁用会提高性能
+            opacityOnGrid: false,
+
+            //动画切块的行、列数（数量越大，越卡。。）
+            cols: 5,
+            rows: 5,
+            //动画切条的行、列数（为0时与上面相同）
+            slicedCols: 0,
+            slicedRows: 0,
+
+
+
+            onStartLoading: function () { testMesssage("loading"); },
+            onLoaded: function () { testMesssage("loaded"); },
+            onStartTransition: function () { testMesssage("start"); },
+            onEndTransition: function () { testMesssage("end"); },
+        });
+
+        $('#camera_test').cameraStop(); //停止播放
+        $('#camera_test').cameraPlay(); //开始播放
+        $('#camera_test').cameraPause(); //暂停播放
+        $('#camera_test').cameraResume(); //继续播放（暂停后）
+    });
+
+    function testMesssage(message) {
+        $("#test").append(message + "\r\n");
+    }
+</script>
+
+<style>
+    #img2_div1 {
+        position: absolute;
+        top: 5%;
+        left: 5%;
+        background: #000;
+        color: #fff;
+        padding: 5px;
+        width: 25%;
+    }
+
+    #img2_div2 {
+        position: absolute;
+        top: 5%;
+        right: 5%;
+        background: #000;
+        color: #fff;
+        padding: 5px;
+        width: 25%;
+    }
+</style>
+
+<h2 class="page-header">幻灯片测试（未完成）</h2>
+<div>
+    <div class="camera_wrap" id="camera_test">
+        <!--为视频元素添加：data-video="hide" 属性，可以使视频在用户点击后再播放，否则会在切换完成后自动播放。-->
+        <div data-video="hide" data-thumb="../images/slides/thumbs/big_bunny_fake.jpg" data-src="../images/slides/big_bunny_fake.jpg">
+            <iframe src="~/error.html" style="width: 100%;height:100%;border: none" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+        </div>
+        <!--
+            在js定义中已有，此处可覆盖掉js中的定义，在此仅给出简略说明，详细请见js部分说明：
+                data-alignment：图片在区域中的对齐方式。
+                data-easing：切换效果的风格。
+                data-mobileEasing：切换效果的风格 for 移动设备。
+                data-fx：切换效果。
+                data-portrait：不对图片进行拉伸：true, false。
+                data-slideOn：切换效果作用在：next、prev、random。
+                data-time：自动播放的时间间隔（毫秒）。
+                data-transPeriod：切换效果的播放时长（毫秒）。
+
+            针对每张幻灯片的特有选项：
+                data-link：在幻灯片上添加超链接。
+                data-target：超链接的打开方式。（_blank, _new, _parent, _self, _top）
+                data-src：幻灯片图片的地址。
+                data-thumb：幻灯片图片缩略图的地址，仅当启用缩略图功能时有用。
+        -->
+        <div data-thumb="../images/slides/thumbs/leaf.jpg" data-src="../images/slides/leaf.jpg" data-trasperiod="4000" data-time="5000" data-portrait="false">
+            <!--可以在图片中添加样式为 position:absolute 的元素-->
+            <div id="img2_div1" class="camera_effected">
+                通过添加camera_effected样式，使这个元素将和图片一起通过动画效果切入进来
+            </div>
+            <div id="img2_div2" class="fadeIn">
+                通过添加fadeIn样式，使这个元素将在图片切换完成后淡入进来（注：如果对图片的停留时间设置过段，可能导致淡入效果不完全）
+            </div>
+        </div>
+        <div data-thumb="../images/slides/thumbs/road.jpg" data-src="../images/slides/road.jpg" data-time="1500" data-trasperiod="4000" data-link="http://www.google.com/" data-target="_blank">
+            <!--可以对标题设置进入效果，但无论如何设置效果，标题始终会位于底部。
+                可选效果如下：moveFromLeft, moveFomRight, moveFromTop, moveFromBottom, fadeIn, fadeFromLeft, fadeFromRight, fadeFromTop, fadeFromBottom-->
+            <div class="camera_caption moveFromTop">
+                这里是标题
+            </div>
+        </div>
+    </div>
+</div>
+<div style="clear:both;"></div>
+<textarea id="test" style="width: 500px;height:500px;"></textarea>

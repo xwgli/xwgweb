@@ -1,0 +1,232 @@
+﻿@{
+    ViewBag.Title = "二维码生成/读取 - 在线小工具";
+}
+
+@Scripts.Render("~/jquery/js/fileupload")
+@Styles.Render("~/jquery/css/fileupload")
+
+<script>
+    var generateUrl = "@Url.Action("GenerateQRCode")";
+    var decodeUrl = "@Url.Action("DecodeQRCode")";
+
+    //生成二维码
+    function generateQRCode(text) {
+        if (!text) {
+            text = $("#source_text").val();
+        }
+        if (!text) {
+            alert("请输入二维码的内容！");
+            return;
+        }
+        $.ajax({
+            url: generateUrl,
+            data: { text: text },
+            success: function (url) {
+                //方法1：通过网址下载图片
+                //$("#generate_result img").attr("src", url);
+
+                //方法2：通过Data URI直接加载图片
+                $("#generate_result").html(url);
+            }
+        });
+    }
+
+    function initFileUpload() {
+        $("#upload_select_file").fileupload({
+            url: decodeUrl,
+            //先于add事件被触发，用于检查选择文件
+            change: function (e, data) {
+                //遍历检查选择的文件
+                data.files = $.grep(data.files, function (file, index) {
+                    //检查扩展名
+                    var regex = /.jpg$|.png$/;
+                    var result1 = regex.test(file.name.toLowerCase());
+                    if (!result1) {
+                        alert('请选择*.jpg或*.png文件！');
+                        return false;
+                    }
+                    //检查文件大小
+                    var result2 = file.size < 4194304;
+                    if (!result2) {
+                        alert('请选择小于4MB的文件！');
+                        return false;
+                    }
+                    return true;
+                });
+            },
+            //有文件被加入到此控件中时触发｛如果在此事件（add）之前的事件（如：change）将文件过滤掉（data.files.length <= 0），就不会再触发这个事件｝
+            add: function (e, data) {
+
+                $("#decode_result_area").hide();
+
+                //显示进度条
+                $("#upload_progress").show();
+                $("#upload_select_file").attr("disabled", "disabled");
+
+                //开始上传
+                data.submit();
+            },
+            progressall: function (e, data) {
+                //实时更新上传进度
+                var progress = parseInt(data.loaded / data.total * 100, 10);
+                $('#upload_progress .bar').css('width', progress + '%');
+                $("#progressText").text(progress + "%");
+                $("#upload_speed").text("（速度：" + ((data.bitrate / 8) / 1024).toFixed(2) + "KB/s）");
+            },
+            done: function (e, data) {
+                //隐藏进度显示
+                $("#upload_progress").hide();
+                $("#upload_select_file").removeAttr("disabled");
+
+                //显示数据
+                $("#decode_result_area").show();
+                $("#decode_result").text(data.result);
+            },
+            fail: function (e, data) {
+                //隐藏进度显示
+                $("#upload_progress").hide();
+                $("#upload_select_file").removeAttr("disabled");
+
+                //提示失败
+                alert('上传失败！');
+            }
+        });
+    }
+
+    $(function () {
+        generateQRCode(location.href);
+
+        initFileUpload();
+    });
+</script>
+
+<style>
+    .com_hidden {
+        display: none;
+    }
+
+    body {
+        min-width: 325px;
+    }
+
+    #source_text {
+        resize: none;
+        height: 100%;
+    }
+
+    #generate_qrcode {
+        width: 256px;
+        margin: 0 auto;
+    }
+
+    #generate_result {
+        width: 256px;
+        height: 256px;
+    }
+
+    #generate_button {
+        margin-top: 10px;
+    }
+
+    .blank {
+        height: 20px;
+    }
+
+
+    .small_tip {
+        height: 20px;
+        font-size: 12px;
+        color: gray;
+    }
+
+        .small_tip.with_margin {
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+    .progress_bar {
+        margin-top: 10px;
+        width: 300px;
+        border: 1px solid green;
+    }
+
+        .progress_bar .bar {
+            width: 50%;
+            height: 20px;
+            background-color: green;
+            text-align: center;
+        }
+
+    #progressText {
+        color: white;
+    }
+
+    .fileinput-button .glyphicon {
+        font-size: 18px;
+        vertical-align: top;
+    }
+</style>
+
+<h2 class="page-header">二维码生成/读取</h2>
+<div class="well">
+    <div class="row">
+        <div class="col-md-8">
+            <label for="source_text">
+                请输入二维码的内容：
+            </label>
+            <textarea class="form-control" id="source_text" rows="14"></textarea>
+        </div>
+        <div class="col-md-4">
+            <div class="blank hidden-md hidden-lg"></div>
+            <div id="generate_qrcode">
+                <label for="generate_result">
+                    生成结果：
+                </label>
+                <div id="generate_result">
+                    <img />
+                </div>
+                <div id="generate_button">
+                    <input type="button" class="btn btn-block btn-primary" value="生成二维码" onclick="generateQRCode()" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--表单方式提交-->
+<!--form action="@Url.Action("DecodeQRCode")" method="POST" enctype="multipart/form-data">
+    <input id="upload_qrcode_file" name="qrcode_file" type="file" />
+    <input type="submit" value="上传二维码" />
+</form-->
+<!--选择文件-->
+<div>
+    <span class="btn btn-block btn-success fileinput-button">
+        <i class="glyphicon glyphicon-upload"></i>
+        &nbsp;
+        <span>上传图片读取二维码</span>
+        <input type="file" id="upload_select_file" accept="image/*" capture="camera" />
+    </span>
+
+    <div class="small_tip with_margin">
+        文件类型仅支持：*.jpg、*.png，文件大小不得超过4MB。
+    </div>
+</div>
+
+<!--上传进度条-->
+<div id="upload_progress" class="com_hidden">
+    <div>上传进度：<span id="upload_speed" class="small_tip"></span></div>
+    <div class="progress_bar">
+        <div class="bar">
+            <div id="progressText">
+                50%
+            </div>
+        </div>
+    </div>
+    <div class="small_tip with_margin">文件上传中，请稍候。。。</div>
+</div>
+
+<!--读取结果-->
+<div id="decode_result_area" class="com_hidden">
+    <h3>读取结果：</h3>
+    <div class="well" id="decode_result"></div>
+</div>

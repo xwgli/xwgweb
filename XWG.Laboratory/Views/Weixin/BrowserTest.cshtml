@@ -1,0 +1,216 @@
+﻿@{
+    ViewBag.Title = "微信浏览器测试";
+}
+
+<h2 class="page-header">微信浏览器测试</h2>
+
+<div id="not_in_weixin">
+    <h3>对不起，您当前不在微信浏览器中，无法进行测试。</h3>
+</div>
+
+<div id="test_area" class="hidden">
+    <p>测试WeixinApi，来源：<a href="https://github.com/zxlie/WeixinApi">https://github.com/zxlie/WeixinApi</a>。</p>
+    <p>
+        <button id="optionMenu">WeixinApi.hideOptionMenu</button>
+    </p>
+    <p>
+        <button id="toolbar">WeixinApi.hideToolbar</button>
+    </p>
+    <p>
+        <button id="networkType">WeixinApi.getNetworkType</button>
+    </p>
+    <p>
+        <button id="imagePreview">WeixinApi.imagePreview</button>
+    </p>
+    <p>
+        <button id="closeWindow">WeixinApi.closeWindow</button>
+    </p>
+    <p>
+        <button id="scanQRCode">WeixinApi.scanQRCode</button>
+    </p>
+    <p>
+        <button id="getInstallState">WeixinApi.getInstallState</button>
+    </p>
+    <p>
+        <button id="sendEmail">WeixinApi.sendEmail</button>
+    </p>
+    <p>
+        <button id="refresh">没有刷新按钮的，点我刷新页面</button>
+    </p>
+    <div class="well">
+        <h4>浏览器 UserAgent：</h4>
+        <div id="user_agent">
+
+        </div>
+    </div>
+    <div class="well">
+        <h4>点击图片可调用内置图片查看器</h4>
+        <a href="weixin://viewimage/@(ViewBag.Root)Images/LazyTest/wp_ss_20140416_0003.png">
+            <img class="img-responsive" src="~/Images/LazyTest/wp_ss_20140416_0003.png">
+        </a>
+    </div>
+</div>
+
+<div id="weixin_js_bridge"></div>
+
+@Scripts.Render("~/weixin/api")
+
+<script type="text/javascript">
+
+    var root = "@(ViewBag.Root)";
+
+    // 开启Api的debug模式
+    WeixinApi.enableDebugMode();
+
+    // 给按钮增加click事件：请不要太纠结这个写法，demo而已
+    var addEvent = function (elId, listener) {
+        document.getElementById(elId)
+            .addEventListener('click', function (e) {
+                if (!window.WeixinApi || !window.WeixinJSBridge) {
+                    alert('请确认您是在微信内置浏览器中打开的，并且WeixinApi.js已正确引用');
+                    e.preventDefault();
+                    return false;
+                }
+                return listener(this, e);
+            }, false);
+    };
+
+    // optionMenu的控制
+    addEvent('optionMenu', function (el, e) {
+        if (optionMenuOn) {
+            el.innerHTML = "WeixinApi.showOptionMenu";
+            WeixinApi.hideOptionMenu();
+        } else {
+            el.innerHTML = "WeixinApi.hideOptionMenu";
+            WeixinApi.showOptionMenu();
+        }
+        optionMenuOn = !optionMenuOn;
+    });
+
+    // 两个Flag
+    var optionMenuOn = true;
+    var toolbarOn = true;
+
+    // optionMenu的控制
+    addEvent('optionMenu', function (el, e) {
+        if (optionMenuOn) {
+            el.innerHTML = "WeixinApi.showOptionMenu";
+            WeixinApi.hideOptionMenu();
+        } else {
+            el.innerHTML = "WeixinApi.hideOptionMenu";
+            WeixinApi.showOptionMenu();
+        }
+        optionMenuOn = !optionMenuOn;
+    });
+
+    // toolbar的控制
+    addEvent('toolbar', function (el, e) {
+        if (toolbarOn) {
+            el.innerHTML = "WeixinApi.showToolbar";
+            WeixinApi.hideToolbar();
+        } else {
+            el.innerHTML = "WeixinApi.hideToolbar";
+            WeixinApi.showToolbar();
+        }
+        toolbarOn = !toolbarOn;
+    });
+
+    // 获取网络类型
+    addEvent('networkType', function (el, e) {
+        WeixinApi.getNetworkType(function (network) {
+            alert("当前网络类型：" + network);
+        });
+    });
+
+    // 调起客户端的图片播放组件
+    addEvent('imagePreview', function (el, e) {
+        // 需要播放的图片 src list
+        var srcList = [
+            root + "Images/LazyTest/wp_ss_20140416_0003.png",
+            root + "Images/LazyTest/wp_ss_20140416_0004.png",
+            root + "Images/LazyTest/wp_ss_20140416_0005.png",
+            root + "Images/LazyTest/wp_ss_20140416_0006.png"
+        ];
+        // 调起
+        WeixinApi.imagePreview(srcList[0], srcList);
+    });
+
+    // 关闭窗口
+    addEvent('closeWindow', function (el, e) {
+        WeixinApi.closeWindow({
+            success: function (resp) {
+                alert('关闭窗口成功！');
+            },
+            fail: function (resp) {
+                alert('关闭窗口失败');
+            }
+        });
+    });
+
+    // 打开扫码
+    addEvent('scanQRCode', function (el, e) {
+        WeixinApi.scanQRCode({
+            success: function (resp) {
+                alert('扫描器已打开！');
+            },
+            fail: function (resp) {
+                alert('扫描器无法打开');
+            }
+        });
+    });
+
+    // 判断是否安装对应的应用（需要官方打开权限）
+    addEvent("getInstallState", function (el, e) {
+        WeixinApi.getInstallState({
+            packageName: "cn.dxy.android.aspirin",
+            packageUrl: "dxy-aspirin"
+        }, {
+            success: function (resp) {
+                alert("App is installed, version " + resp.version);
+            },
+            fail: function (resp) {
+                alert("Oops, something goes wrong or app is not installed.");
+            }
+        });
+    });
+
+    // 发送邮件
+    addEvent("sendEmail", function (el, e) {
+        WeixinApi.sendEmail({
+            subject: 'Hello world！',
+            body: '这是一封测试邮件，Demo而已，慢慢玩儿吧！'
+        });
+    });
+
+    // 刷新
+    addEvent('refresh', function (el, e) {
+        location.replace('?' + Math.random(), true);
+    });
+
+    // WeixinApi初始化完成后才进行下面的动作
+    WeixinApi.ready(function (Api) {
+
+        $("#user_agent").text(navigator.userAgent);
+
+        //判断是否在微信中打开（Windows Phone中是没用的！！！）
+        //if (WeixinApi.openInWeixin()) {
+        if (window.WeixinJSBridge) {
+            $("#not_in_weixin").addClass("hidden");
+            $("#test_area").removeClass("hidden");
+
+            var html = [];
+            for (var key in window.WeixinJSBridge) {
+                var js = 'WeixinJSBridge.' + key + ' = ' + window.WeixinJSBridge[key].toString();
+                html.push('<div class="well">' + js + '</div>');
+            }
+            $("#weixin_js_bridge").html(html.join(''));
+
+            // 有可能用户是直接用微信“扫一扫”打开的，这个情况下，optionMenu是off状态
+            // 为了方便用户测试，我先来trigger show一下
+            var elOptionMenu = document.getElementById('optionMenu');
+            elOptionMenu.click(); // 先隐藏
+            elOptionMenu.click(); // 再显示
+        }
+    });
+
+</script>

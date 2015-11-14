@@ -1,0 +1,467 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="XwgWebDBModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="tbl_ChatRecord">
+          <Key>
+            <PropertyRef Name="RecordId" />
+          </Key>
+          <Property Name="RecordId" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="VisitorId" Type="bigint" Nullable="false" />
+          <Property Name="NickName" Type="nvarchar" MaxLength="140" />
+          <Property Name="Message" Type="nvarchar" MaxLength="140" Nullable="false" />
+          <Property Name="SendTime" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tbl_CommentPage">
+          <Key>
+            <PropertyRef Name="PageId" />
+          </Key>
+          <Property Name="PageId" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="PageName" Type="nvarchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tbl_CommentRecord">
+          <Key>
+            <PropertyRef Name="RecordId" />
+          </Key>
+          <Property Name="RecordId" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="PageId" Type="bigint" Nullable="false" />
+          <Property Name="VisitorId" Type="bigint" Nullable="false" />
+          <Property Name="NickName" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="Comment" Type="nvarchar" MaxLength="500" Nullable="false" />
+          <Property Name="CommentTime" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tbl_VisitRecord">
+          <Key>
+            <PropertyRef Name="VisitorId" />
+          </Key>
+          <Property Name="VisitorId" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserAgent" Type="nvarchar" MaxLength="1024" Nullable="false" />
+          <Property Name="VisitorIP" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="VisitTime" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tbl_WeixinQa">
+          <Key>
+            <PropertyRef Name="QaId" />
+          </Key>
+          <Property Name="QaId" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Question" Type="nvarchar" MaxLength="500" Nullable="false" />
+          <Property Name="Answer" Type="nvarchar" MaxLength="500" Nullable="false" />
+          <Property Name="UserId" Type="bigint" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tbl_WeixinRecord">
+          <Key>
+            <PropertyRef Name="RecordId" />
+          </Key>
+          <Property Name="RecordId" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ReciveData" Type="nvarchar" MaxLength="1000" Nullable="false" />
+          <Property Name="SendData" Type="nvarchar" MaxLength="1000" Nullable="false" />
+          <Property Name="ReciveTime" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tbl_WeixinTextMessage">
+          <Key>
+            <PropertyRef Name="MessageId" />
+          </Key>
+          <Property Name="MessageId" Type="bigint" Nullable="false" />
+          <Property Name="SendUserId" Type="bigint" Nullable="false" />
+          <Property Name="Message" Type="nvarchar" MaxLength="500" Nullable="false" />
+          <Property Name="Response" Type="nvarchar" MaxLength="500" Nullable="false" />
+          <Property Name="SendTime" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="tbl_WeixinUser">
+          <Key>
+            <PropertyRef Name="UserId" />
+          </Key>
+          <Property Name="UserId" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserName" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="NickName" Type="nvarchar" MaxLength="32" Nullable="false" />
+          <Property Name="RobotName" Type="nvarchar" MaxLength="32" Nullable="false" />
+          <Property Name="IsSpecial" Type="bit" Nullable="false" />
+          <Property Name="CreateTime" Type="datetime" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_tbl_WeixinQa_tbl_WeixinUser">
+          <End Role="tbl_WeixinUser" Type="Self.tbl_WeixinUser" Multiplicity="1" />
+          <End Role="tbl_WeixinQa" Type="Self.tbl_WeixinQa" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tbl_WeixinUser">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tbl_WeixinQa">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_tbl_WeixinTextMessage_tbl_WeixinUser">
+          <End Role="tbl_WeixinUser" Type="Self.tbl_WeixinUser" Multiplicity="1" />
+          <End Role="tbl_WeixinTextMessage" Type="Self.tbl_WeixinTextMessage" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tbl_WeixinUser">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tbl_WeixinTextMessage">
+              <PropertyRef Name="SendUserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_聊天记录与访问者关联">
+          <End Role="tbl_VisitRecord" Type="Self.tbl_VisitRecord" Multiplicity="1" />
+          <End Role="tbl_ChatRecord" Type="Self.tbl_ChatRecord" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tbl_VisitRecord">
+              <PropertyRef Name="VisitorId" />
+            </Principal>
+            <Dependent Role="tbl_ChatRecord">
+              <PropertyRef Name="VisitorId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_评论记录与访问记录关联">
+          <End Role="tbl_VisitRecord" Type="Self.tbl_VisitRecord" Multiplicity="1" />
+          <End Role="tbl_CommentRecord" Type="Self.tbl_CommentRecord" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tbl_VisitRecord">
+              <PropertyRef Name="VisitorId" />
+            </Principal>
+            <Dependent Role="tbl_CommentRecord">
+              <PropertyRef Name="VisitorId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_评论记录与评论页面关联">
+          <End Role="tbl_CommentPage" Type="Self.tbl_CommentPage" Multiplicity="1" />
+          <End Role="tbl_CommentRecord" Type="Self.tbl_CommentRecord" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tbl_CommentPage">
+              <PropertyRef Name="PageId" />
+            </Principal>
+            <Dependent Role="tbl_CommentRecord">
+              <PropertyRef Name="PageId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="XwgWebDBModelStoreContainer">
+          <EntitySet Name="tbl_ChatRecord" EntityType="Self.tbl_ChatRecord" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tbl_CommentPage" EntityType="Self.tbl_CommentPage" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tbl_CommentRecord" EntityType="Self.tbl_CommentRecord" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tbl_VisitRecord" EntityType="Self.tbl_VisitRecord" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tbl_WeixinQa" EntityType="Self.tbl_WeixinQa" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tbl_WeixinRecord" EntityType="Self.tbl_WeixinRecord" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tbl_WeixinTextMessage" EntityType="Self.tbl_WeixinTextMessage" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="tbl_WeixinUser" EntityType="Self.tbl_WeixinUser" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_tbl_WeixinQa_tbl_WeixinUser" Association="Self.FK_tbl_WeixinQa_tbl_WeixinUser">
+            <End Role="tbl_WeixinUser" EntitySet="tbl_WeixinUser" />
+            <End Role="tbl_WeixinQa" EntitySet="tbl_WeixinQa" />
+          </AssociationSet>
+          <AssociationSet Name="FK_tbl_WeixinTextMessage_tbl_WeixinUser" Association="Self.FK_tbl_WeixinTextMessage_tbl_WeixinUser">
+            <End Role="tbl_WeixinUser" EntitySet="tbl_WeixinUser" />
+            <End Role="tbl_WeixinTextMessage" EntitySet="tbl_WeixinTextMessage" />
+          </AssociationSet>
+          <AssociationSet Name="FK_聊天记录与访问者关联" Association="Self.FK_聊天记录与访问者关联">
+            <End Role="tbl_VisitRecord" EntitySet="tbl_VisitRecord" />
+            <End Role="tbl_ChatRecord" EntitySet="tbl_ChatRecord" />
+          </AssociationSet>
+          <AssociationSet Name="FK_评论记录与访问记录关联" Association="Self.FK_评论记录与访问记录关联">
+            <End Role="tbl_VisitRecord" EntitySet="tbl_VisitRecord" />
+            <End Role="tbl_CommentRecord" EntitySet="tbl_CommentRecord" />
+          </AssociationSet>
+          <AssociationSet Name="FK_评论记录与评论页面关联" Association="Self.FK_评论记录与评论页面关联">
+            <End Role="tbl_CommentPage" EntitySet="tbl_CommentPage" />
+            <End Role="tbl_CommentRecord" EntitySet="tbl_CommentRecord" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="XwgWebDBModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="XwgWebDBEntities" annotation:LazyLoadingEnabled="true" >
+          <EntitySet Name="tbl_ChatRecord" EntityType="XwgWebDBModel.tbl_ChatRecord" />
+          <EntitySet Name="tbl_CommentPage" EntityType="XwgWebDBModel.tbl_CommentPage" />
+          <EntitySet Name="tbl_VisitRecord" EntityType="XwgWebDBModel.tbl_VisitRecord" />
+          <AssociationSet Name="FK_聊天记录与访问者关联" Association="XwgWebDBModel.FK_聊天记录与访问者关联">
+            <End Role="tbl_VisitRecord" EntitySet="tbl_VisitRecord" />
+            <End Role="tbl_ChatRecord" EntitySet="tbl_ChatRecord" />
+          </AssociationSet>
+          <EntitySet Name="tbl_CommentRecord" EntityType="XwgWebDBModel.tbl_CommentRecord" />
+          <AssociationSet Name="FK_评论记录与评论页面关联" Association="XwgWebDBModel.FK_评论记录与评论页面关联">
+            <End Role="tbl_CommentPage" EntitySet="tbl_CommentPage" />
+            <End Role="tbl_CommentRecord" EntitySet="tbl_CommentRecord" />
+          </AssociationSet>
+          <AssociationSet Name="FK_评论记录与访问记录关联" Association="XwgWebDBModel.FK_评论记录与访问记录关联">
+            <End Role="tbl_VisitRecord" EntitySet="tbl_VisitRecord" />
+            <End Role="tbl_CommentRecord" EntitySet="tbl_CommentRecord" />
+          </AssociationSet>
+          <EntitySet Name="tbl_WeixinRecord" EntityType="XwgWebDBModel.tbl_WeixinRecord" />
+          <EntitySet Name="tbl_WeixinTextMessage" EntityType="XwgWebDBModel.tbl_WeixinTextMessage" />
+          <EntitySet Name="tbl_WeixinUser" EntityType="XwgWebDBModel.tbl_WeixinUser" />
+          <AssociationSet Name="FK_tbl_WeixinTextMessage_tbl_WeixinUser" Association="XwgWebDBModel.FK_tbl_WeixinTextMessage_tbl_WeixinUser">
+            <End Role="tbl_WeixinUser" EntitySet="tbl_WeixinUser" />
+            <End Role="tbl_WeixinTextMessage" EntitySet="tbl_WeixinTextMessage" />
+          </AssociationSet>
+          <EntitySet Name="tbl_WeixinQa" EntityType="XwgWebDBModel.tbl_WeixinQa" />
+          <AssociationSet Name="FK_tbl_WeixinQa_tbl_WeixinUser" Association="XwgWebDBModel.FK_tbl_WeixinQa_tbl_WeixinUser">
+            <End Role="tbl_WeixinUser" EntitySet="tbl_WeixinUser" />
+            <End Role="tbl_WeixinQa" EntitySet="tbl_WeixinQa" />
+          </AssociationSet>
+          </EntityContainer>
+        <EntityType Name="tbl_ChatRecord">
+          <Key>
+            <PropertyRef Name="RecordId" />
+          </Key>
+          <Property Name="RecordId" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="VisitorId" Type="Int64" Nullable="false" />
+          <Property Name="NickName" Type="String" MaxLength="140" FixedLength="false" Unicode="true" />
+          <Property Name="Message" Type="String" Nullable="false" MaxLength="140" FixedLength="false" Unicode="true" />
+          <Property Name="SendTime" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="tbl_VisitRecord" Relationship="XwgWebDBModel.FK_聊天记录与访问者关联" FromRole="tbl_ChatRecord" ToRole="tbl_VisitRecord" />
+        </EntityType>
+        <EntityType Name="tbl_CommentPage">
+          <Key>
+            <PropertyRef Name="PageId" />
+          </Key>
+          <Property Name="PageId" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="PageName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="tbl_CommentRecord" Relationship="XwgWebDBModel.FK_评论记录与评论页面关联" FromRole="tbl_CommentPage" ToRole="tbl_CommentRecord" />
+        </EntityType>
+        <EntityType Name="tbl_VisitRecord">
+          <Key>
+            <PropertyRef Name="VisitorId" />
+          </Key>
+          <Property Name="VisitorId" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserAgent" Type="String" Nullable="false" MaxLength="1024" FixedLength="false" Unicode="true" />
+          <Property Name="VisitorIP" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
+          <Property Name="VisitTime" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="tbl_ChatRecord" Relationship="XwgWebDBModel.FK_聊天记录与访问者关联" FromRole="tbl_VisitRecord" ToRole="tbl_ChatRecord" />
+          <NavigationProperty Name="tbl_CommentRecord" Relationship="XwgWebDBModel.FK_评论记录与访问记录关联" FromRole="tbl_VisitRecord" ToRole="tbl_CommentRecord" />
+        </EntityType>
+        <Association Name="FK_聊天记录与访问者关联">
+          <End Type="XwgWebDBModel.tbl_VisitRecord" Role="tbl_VisitRecord" Multiplicity="1" />
+          <End Type="XwgWebDBModel.tbl_ChatRecord" Role="tbl_ChatRecord" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tbl_VisitRecord">
+              <PropertyRef Name="VisitorId" />
+            </Principal>
+            <Dependent Role="tbl_ChatRecord">
+              <PropertyRef Name="VisitorId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="tbl_CommentRecord">
+          <Key>
+            <PropertyRef Name="RecordId" />
+          </Key>
+          <Property Name="RecordId" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="PageId" Type="Int64" Nullable="false" />
+          <Property Name="VisitorId" Type="Int64" Nullable="false" />
+          <Property Name="NickName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Comment" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="CommentTime" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="tbl_CommentPage" Relationship="XwgWebDBModel.FK_评论记录与评论页面关联" FromRole="tbl_CommentRecord" ToRole="tbl_CommentPage" />
+          <NavigationProperty Name="tbl_VisitRecord" Relationship="XwgWebDBModel.FK_评论记录与访问记录关联" FromRole="tbl_CommentRecord" ToRole="tbl_VisitRecord" />
+        </EntityType>
+        <Association Name="FK_评论记录与评论页面关联">
+          <End Type="XwgWebDBModel.tbl_CommentPage" Role="tbl_CommentPage" Multiplicity="1" />
+          <End Type="XwgWebDBModel.tbl_CommentRecord" Role="tbl_CommentRecord" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tbl_CommentPage">
+              <PropertyRef Name="PageId" />
+            </Principal>
+            <Dependent Role="tbl_CommentRecord">
+              <PropertyRef Name="PageId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_评论记录与访问记录关联">
+          <End Type="XwgWebDBModel.tbl_VisitRecord" Role="tbl_VisitRecord" Multiplicity="1" />
+          <End Type="XwgWebDBModel.tbl_CommentRecord" Role="tbl_CommentRecord" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tbl_VisitRecord">
+              <PropertyRef Name="VisitorId" />
+            </Principal>
+            <Dependent Role="tbl_CommentRecord">
+              <PropertyRef Name="VisitorId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="tbl_WeixinRecord">
+          <Key>
+            <PropertyRef Name="RecordId" />
+          </Key>
+          <Property Name="RecordId" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ReciveData" Type="String" Nullable="false" MaxLength="1000" FixedLength="false" Unicode="true" />
+          <Property Name="SendData" Type="String" Nullable="false" MaxLength="1000" FixedLength="false" Unicode="true" />
+          <Property Name="ReciveTime" Type="DateTime" Nullable="false" Precision="3" />
+        </EntityType>
+        <EntityType Name="tbl_WeixinTextMessage">
+          <Key>
+            <PropertyRef Name="MessageId" />
+          </Key>
+          <Property Name="MessageId" Type="Int64" Nullable="false" />
+          <Property Name="SendUserId" Type="Int64" Nullable="false" />
+          <Property Name="Message" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="SendTime" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="tbl_WeixinUser" Relationship="XwgWebDBModel.FK_tbl_WeixinTextMessage_tbl_WeixinUser" FromRole="tbl_WeixinTextMessage" ToRole="tbl_WeixinUser" />
+          <Property Name="Response" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="tbl_WeixinUser">
+          <Key>
+            <PropertyRef Name="UserId" />
+          </Key>
+          <Property Name="UserId" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserName" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
+          <Property Name="NickName" Type="String" Nullable="false" MaxLength="32" FixedLength="false" Unicode="true" />
+          <Property Name="RobotName" Type="String" Nullable="false" MaxLength="32" FixedLength="false" Unicode="true" />
+          <Property Name="IsSpecial" Type="Boolean" Nullable="false" />
+          <Property Name="CreateTime" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="tbl_WeixinTextMessage" Relationship="XwgWebDBModel.FK_tbl_WeixinTextMessage_tbl_WeixinUser" FromRole="tbl_WeixinUser" ToRole="tbl_WeixinTextMessage" />
+          <NavigationProperty Name="tbl_WeixinQa" Relationship="XwgWebDBModel.FK_tbl_WeixinQa_tbl_WeixinUser" FromRole="tbl_WeixinUser" ToRole="tbl_WeixinQa" />
+        </EntityType>
+        <Association Name="FK_tbl_WeixinTextMessage_tbl_WeixinUser">
+          <End Type="XwgWebDBModel.tbl_WeixinUser" Role="tbl_WeixinUser" Multiplicity="1" />
+          <End Type="XwgWebDBModel.tbl_WeixinTextMessage" Role="tbl_WeixinTextMessage" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tbl_WeixinUser">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tbl_WeixinTextMessage">
+              <PropertyRef Name="SendUserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="tbl_WeixinQa">
+          <Key>
+            <PropertyRef Name="QaId" />
+          </Key>
+          <Property Name="QaId" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Question" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="Answer" Type="String" Nullable="false" MaxLength="500" FixedLength="false" Unicode="true" />
+          <Property Name="UserId" Type="Int64" Nullable="false" />
+          <NavigationProperty Name="tbl_WeixinUser" Relationship="XwgWebDBModel.FK_tbl_WeixinQa_tbl_WeixinUser" FromRole="tbl_WeixinQa" ToRole="tbl_WeixinUser" />
+        </EntityType>
+        <Association Name="FK_tbl_WeixinQa_tbl_WeixinUser">
+          <End Type="XwgWebDBModel.tbl_WeixinUser" Role="tbl_WeixinUser" Multiplicity="1" />
+          <End Type="XwgWebDBModel.tbl_WeixinQa" Role="tbl_WeixinQa" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="tbl_WeixinUser">
+              <PropertyRef Name="UserId" />
+            </Principal>
+            <Dependent Role="tbl_WeixinQa">
+              <PropertyRef Name="UserId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="XwgWebDBModelStoreContainer" CdmEntityContainer="XwgWebDBEntities" >
+          <EntitySetMapping Name="tbl_ChatRecord">
+            <EntityTypeMapping TypeName="XwgWebDBModel.tbl_ChatRecord">
+              <MappingFragment StoreEntitySet="tbl_ChatRecord">
+                <ScalarProperty Name="SendTime" ColumnName="SendTime" />
+                <ScalarProperty Name="Message" ColumnName="Message" />
+                <ScalarProperty Name="NickName" ColumnName="NickName" />
+                <ScalarProperty Name="VisitorId" ColumnName="VisitorId" />
+                <ScalarProperty Name="RecordId" ColumnName="RecordId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tbl_CommentPage">
+            <EntityTypeMapping TypeName="XwgWebDBModel.tbl_CommentPage">
+              <MappingFragment StoreEntitySet="tbl_CommentPage">
+                <ScalarProperty Name="PageName" ColumnName="PageName" />
+                <ScalarProperty Name="PageId" ColumnName="PageId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tbl_VisitRecord">
+            <EntityTypeMapping TypeName="XwgWebDBModel.tbl_VisitRecord">
+              <MappingFragment StoreEntitySet="tbl_VisitRecord">
+                <ScalarProperty Name="VisitTime" ColumnName="VisitTime" />
+                <ScalarProperty Name="VisitorIP" ColumnName="VisitorIP" />
+                <ScalarProperty Name="UserAgent" ColumnName="UserAgent" />
+                <ScalarProperty Name="VisitorId" ColumnName="VisitorId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tbl_CommentRecord">
+            <EntityTypeMapping TypeName="XwgWebDBModel.tbl_CommentRecord">
+              <MappingFragment StoreEntitySet="tbl_CommentRecord">
+                <ScalarProperty Name="CommentTime" ColumnName="CommentTime" />
+                <ScalarProperty Name="Comment" ColumnName="Comment" />
+                <ScalarProperty Name="NickName" ColumnName="NickName" />
+                <ScalarProperty Name="VisitorId" ColumnName="VisitorId" />
+                <ScalarProperty Name="PageId" ColumnName="PageId" />
+                <ScalarProperty Name="RecordId" ColumnName="RecordId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tbl_WeixinRecord">
+            <EntityTypeMapping TypeName="XwgWebDBModel.tbl_WeixinRecord">
+              <MappingFragment StoreEntitySet="tbl_WeixinRecord">
+                <ScalarProperty Name="ReciveTime" ColumnName="ReciveTime" />
+                <ScalarProperty Name="SendData" ColumnName="SendData" />
+                <ScalarProperty Name="ReciveData" ColumnName="ReciveData" />
+                <ScalarProperty Name="RecordId" ColumnName="RecordId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tbl_WeixinTextMessage">
+            <EntityTypeMapping TypeName="XwgWebDBModel.tbl_WeixinTextMessage">
+              <MappingFragment StoreEntitySet="tbl_WeixinTextMessage">
+                <ScalarProperty Name="Response" ColumnName="Response" />
+                <ScalarProperty Name="SendTime" ColumnName="SendTime" />
+                <ScalarProperty Name="Message" ColumnName="Message" />
+                <ScalarProperty Name="SendUserId" ColumnName="SendUserId" />
+                <ScalarProperty Name="MessageId" ColumnName="MessageId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tbl_WeixinUser">
+            <EntityTypeMapping TypeName="XwgWebDBModel.tbl_WeixinUser">
+              <MappingFragment StoreEntitySet="tbl_WeixinUser">
+                <ScalarProperty Name="CreateTime" ColumnName="CreateTime" />
+                <ScalarProperty Name="IsSpecial" ColumnName="IsSpecial" />
+                <ScalarProperty Name="RobotName" ColumnName="RobotName" />
+                <ScalarProperty Name="NickName" ColumnName="NickName" />
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="tbl_WeixinQa">
+            <EntityTypeMapping TypeName="XwgWebDBModel.tbl_WeixinQa">
+              <MappingFragment StoreEntitySet="tbl_WeixinQa">
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="Answer" ColumnName="Answer" />
+                <ScalarProperty Name="Question" ColumnName="Question" />
+                <ScalarProperty Name="QaId" ColumnName="QaId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="无" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

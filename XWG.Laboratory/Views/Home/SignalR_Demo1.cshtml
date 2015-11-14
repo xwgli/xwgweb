@@ -1,0 +1,82 @@
+﻿@{
+    ViewBag.Title = "SignalR 示例1";
+}
+
+@section Scripts{
+    <!-- 首先引用 jQuery 类库 -->
+    <!-- 再引用 SignalR 类库 -->
+    @Scripts.Render("~/signalr/js")
+    <!-- 引用自动生成的 SignalR hub 脚本 -->
+    @Scripts.Render("~/signalr/hubs")
+
+    <!-- 引用jQuery UI 类库来实现拖动效果 -->
+    <script src="~/Scripts/jqueryui/jquery.ui.no.widgets.js"></script>
+    <script>
+        $(function () {
+            var testHub = $.connection.testHub,
+            shape = $("#shape"),
+            shapeModel = {
+                left: 0,
+                top: 0
+            },
+            // 发送时间间隔（毫秒）
+            updateRate = 1000 / 10,
+            // 记录自上次发送位置信息后是否更新了位置信息
+            moved = false;
+
+            // 更新图形位置的方法
+            testHub.client.updateShape = function (model) {
+                shapeModel = model;
+
+                // [否决的]直接修改元素位置
+                // shape.css({ left: model.left, top: model.top });
+
+                // 因为间隔时间较长，使用动画来平滑移动效果
+                shape.animate(shapeModel, { duration: updateRate, queue: false });
+            };
+            // 连接建立后启用图形的拖拽
+            $.connection.hub.start().done(function () {
+                shape.draggable({
+                    drag: function () {
+                        // 记录图形位置信息
+                        shapeModel = shape.offset();
+                        moved = true;
+
+                        // [否决的]每次拖拽都向服务器更新位置信息
+                        // testHub.server.updateModel(shapeModel);
+                    }
+                });
+                // 固定频率更新位置信息
+                setInterval(updateServerModel, updateRate);
+            });
+
+            // 向服务器更新位置信息
+            function updateServerModel() {
+                if (moved) {
+                    testHub.server.updateModel(shapeModel);
+                    moved = false;
+                }
+            }
+        });
+    </script>
+}
+
+<style>
+    #shape {
+        width: 100px;
+        height: 100px;
+        background-color: #FF0000;
+        position: absolute;
+    }
+
+    #container {
+        width: 100px;
+        height: 100px;
+    }
+</style>
+
+<h2 class="page-header">SignalR 示例1 - 拖动下面的红方块试试</h2>
+
+<div id="container">
+    <div id="shape"></div>
+</div>

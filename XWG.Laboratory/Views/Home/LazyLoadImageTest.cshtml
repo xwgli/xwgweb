@@ -1,0 +1,87 @@
+﻿@{
+    ViewBag.Title = "延时加载图片测试";
+}
+
+@Scripts.Render("~/jquery/js/lazyload")
+
+<script>
+    $(function () {
+        $("img.lazy").lazyload();
+    });
+</script>
+
+<style>
+    /*页面的背景*/
+    body {
+        background-color: #F7F7F7;
+    }
+
+    /*页面宽>=768的情况下，上下加边距，好看点*/
+    .page_blank_row {
+        height: 20px;
+    }
+
+    /*表单panel最大宽度和页面居中*/
+    .evaluation_border {
+        max-width: 750px;
+        margin: 0 auto;
+    }
+
+    /*表单panel的标题*/
+    .evaluation_title {
+        font-size: 24px;
+        font-weight: bolder;
+    }
+
+    /*图片的说明*/
+    .img_info {
+        margin-top: 20px;
+    }
+
+    /*覆盖well的背景色*/
+    .well {
+        background-color: white;
+    }
+</style>
+
+<div class="hidden-xs page_blank_row"></div>
+<div class="evaluation_border">
+
+    <!--动态加载区域-->
+    <div id="images">
+        <div class="clearfix"></div>
+        <div>
+            <h3>测试图片1</h3>
+            <div class="well">
+                <img class="lazy img-responsive" data-original="@WebHelper.GetRelativeUrl("/Images/LazyTest/wp_ss_20140416_0003.png")" width="768" height="1280" alt="测试图片1">
+                <div class="img_info">这里是图片1的说明</div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+        <div>
+            <h3>测试图片2</h3>
+            <div class="well">
+                <img class="lazy img-responsive" data-original="@WebHelper.GetRelativeUrl("/Images/LazyTest/wp_ss_20140416_0004.png")" width="768" height="1280" alt="测试图片2">
+                <div class="img_info">这里是图片2的说明</div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+        <div>
+            <h3>测试图片3</h3>
+            <div class="well">
+                <img class="lazy img-responsive" data-original="@WebHelper.GetRelativeUrl("/Images/LazyTest/wp_ss_20140416_0005.png")" width="768" height="1280" alt="测试图片3">
+                <div class="img_info">这里是图片3的说明</div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+        <div>
+            <h3>测试图片4</h3>
+            <div class="well">
+                <img class="lazy img-responsive" data-original="@WebHelper.GetRelativeUrl("/Images/LazyTest/wp_ss_20140416_0006.png")" width="768" height="1280" alt="测试图片4">
+                <div class="img_info">这里是图片4的说明</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="hidden-xs page_blank_row"></div>
